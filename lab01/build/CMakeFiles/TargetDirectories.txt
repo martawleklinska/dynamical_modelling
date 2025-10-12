@@ -1,0 +1,3 @@
+/home/marta/Documents/studia/dynamical_modelling/lab01/build/CMakeFiles/main.dir
+/home/marta/Documents/studia/dynamical_modelling/lab01/build/CMakeFiles/edit_cache.dir
+/home/marta/Documents/studia/dynamical_modelling/lab01/build/CMakeFiles/rebuild_cache.dir
