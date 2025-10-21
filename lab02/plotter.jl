@@ -196,23 +196,23 @@ function ex2()
 
     
     # ============================================================
-    # data_dir = "/home/marta/Documents/studia/dynamical_modelling/lab02/build/data/"
-    # files = filter(f -> occursin(r"sys2_traj", f) && endswith(f, ".txt"), readdir(data_dir; join=true))
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/lab02/build/data/"
+    files = filter(f -> occursin(r"sys2_traj", f) && endswith(f, ".txt"), readdir(data_dir; join=true))
 
-    # println("Found $(length(files)) data files:")
-    # foreach(println, files)
+    println("Found $(length(files)) data files:")
+    foreach(println, files)
 
-    # for (i, file) in enumerate(files)
-    #     data = readdlm(file, '\t', skipstart=1)
-    #     label = init_vals[i]
-    #     if size(data, 2) >= 3
-    #         x_vals = data[:, 2]  
-    #         y_vals = data[:, 3]  
-    #         lines!(ax, x_vals, y_vals, linewidth=4, label=label, alpha = 0.7)
-    #     else
-    #         @warn "cos jest nie tak z $(file) "
-    #     end
-    # end
+    for (i, file) in enumerate(files)
+        data = readdlm(file, '\t', skipstart=1)
+        label = init_vals[i]
+        if size(data, 2) >= 3
+            x_vals = data[:, 2]  
+            y_vals = data[:, 3]  
+            lines!(ax, x_vals, y_vals, linewidth=4, label=label, alpha = 0.7)
+        else
+            @warn "cos jest nie tak z $(file) "
+        end
+    end
     Δ(x) = 1 + 2x^2 + 6x
     y_plus(x)  = (-1 + sqrt(Δ(x)))/2
     y_minus(x) = (-1 - sqrt(Δ(x)))/2
@@ -231,8 +231,8 @@ function ex2()
     scatter!(ax, [0.0], [-1.0], color = :black, markersize = 25, marker = :star5)#, label = L"\text{punkt staly} ($0.0, 0.0$)")
     Legend(fig[1,2], ax, labelsize = 24)
 
-    # fig
-    save("lab02/ex2_izokliny.pdf", fig)
+    fig
+    # save("lab02/ex2_izokliny.pdf", fig)
 end
 ex2()
 

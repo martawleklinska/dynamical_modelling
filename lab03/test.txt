@@ -1,0 +1,97 @@
+// example ode
+int Solver::func(double t, const double y[], double f[], void *params) {
+    (void)t; (void)params;
+    double x = y[0], yy = y[1];
+    f[0] = yy;             // dx/dt = y
+    f[1] = -x - 0.2*yy;    // dy/dt = -x - 0.2y  
+    return GSL_SUCCESS;
+}
+
+// jakobian
+void Solver::jacobian(double x, double y, gsl_matrix *J) {
+    double dfdx = 0.0;      // pdv{f}{x}
+    double dfdy = 1.0;      // pdv{f}{y}
+    double dgdx = -1.0;     // pdv{g}{x}
+    double dgdy = -0.2;     // pdv{g}{y}
+
+    gsl_matrix_set(J, 0, 0, dfdx);
+    gsl_matrix_set(J, 0, 1, dfdy);
+    gsl_matrix_set(J, 1, 0, dgdx);
+    gsl_matrix_set(J, 1, 1, dgdy);
+}
+
+Solver::Solver() {}
+
+void Solver::solve_ode(double t0, double t1, int n_steps, const std::string &prefix) {
+    std::filesystem::create_directories("data");
+
+    gsl_odeiv2_system sys = {func, nullptr, 2, nullptr};
+    gsl_odeiv2_driver *driver = gsl_odeiv2_driver_alloc_y_new(
+        &sys, gsl_odeiv2_step_rk8pd, (t1-t0)/n_steps, abs_eps, rel_eps);
+
+    std::vector<std::pair<double,double>> initials = {
+        {0.1, 0.0}, {0.5, 0.0}, {1.0, 0.5}, {-1.0, 0.0}, {-1.0, 1.0}
+    };
+
+    for (auto [x0, y0] : initials) {
+        std::string fname = "data/" + prefix + "_x0_" + std::to_string(x0) + "_y0_" + std::to_string(y0) + ".txt";
+        std::ofstream ofs(fname);
+        ofs << "t\tx\ty\n";
+
+        double t = t0;
+        double y[2] = {x0, y0};
+
+        for (int i = 0; i <= n_steps; ++i) {
+            double ti = t0 + i * (t1 - t0) / n_steps;
+            int status = gsl_odeiv2_driver_apply(driver, &t, ti, y);
+            if (status != GSL_SUCCESS) break;
+            ofs << ti << "\t" << y[0] << "\t" << y[1] << "\n";
+        }
+        ofs.close();
+    }
+    gsl_odeiv2_driver_free(driver);
+}
+
+// Analiza punktów stałych: wartości własne Jacobiego
+void Solver::analyze_fixed_points(const std::vector<std::pair<double,double>> &points) {
+    for (auto [x_star, y_star] : points) {
+        gsl_matrix *J = gsl_matrix_alloc(2,2);
+        jacobian(x_star, y_star, J);
+
+        double a = gsl_matrix_get(J,0,0);
+        double b = gsl_matrix_get(J,0,1);
+        double c = gsl_matrix_get(J,1,0);
+        double d = gsl_matrix_get(J,1,1);
+
+        double tr = a + d;
+        double det = a*d - b*c;
+        double disc = tr*tr - 4*det;
+
+        std::cout << "Punkt staly (" << x_star << ", " << y_star << ")\n";
+        std::cout << "  Tr=" << tr << ", Det=" << det << ", Δ=" << disc << "\n";
+
+        if (det < 0) std::cout << " -> Siodło\n";
+        else if (disc > 0 && tr < 0) std::cout << " -> Węzeł stabilny\n";
+        else if (disc > 0 && tr > 0) std::cout << " -> Węzeł niestabilny\n";
+        else if (disc < 0 && tr < 0) std::cout << " -> Spirala stabilna\n";
+        else if (disc < 0 && tr > 0) std::cout << " -> Spirala niestabilna\n";
+        else if (disc < 0 && std::abs(tr) < 1e-10) std::cout << " -> Centrum\n";
+        std::cout << std::endl;
+
+        gsl_matrix_free(J);
+    }
+}
+
+class Solver {
+public:
+    Solver();
+    void solve_ode(double t0, double t1, int n_steps, const std::string &prefix);
+    void analyze_fixed_points(const std::vector<std::pair<double,double> > &points);
+
+private:
+    static int func(double t, const double y[], double f[], void *params);
+    static void jacobian(double x, double y, gsl_matrix *J);
+
+    double abs_eps = 1e-8;
+    double rel_eps = 1e-8;
+};

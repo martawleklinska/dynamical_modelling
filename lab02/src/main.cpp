@@ -7,12 +7,8 @@
 #include "solver.hpp"
 
 int main() {
-    Solver sol;
 
     std::cout << "test" << std::endl;
-
-    // sol.solve_with_rk8pd();
-    // std::cout << "done pd8" << std::endl;
 
     // ex1: solving the \dot{x}=kx(1-x)
     // Solver_ex1 sol_ex1;
