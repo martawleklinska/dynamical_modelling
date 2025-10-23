@@ -78,32 +78,3 @@ void Solver_pendulum::solve(double t0, double t1, int n_steps) {
 
     gsl_odeiv2_driver_free(driver);
 }
-
-void Solver_pendulum::analyze_fixed_points() {
-    std::vector<double> fixed_points = {0.0, M_PI}; // sinθ = 0
-    gsl_matrix *J = gsl_matrix_alloc(2,2);
-
-    for (double th : fixed_points) {
-        jacobian(th, 0.0, J, model);
-
-        double a = gsl_matrix_get(J,0,0);
-        double b = gsl_matrix_get(J,0,1);
-        double c = gsl_matrix_get(J,1,0);
-        double d = gsl_matrix_get(J,1,1);
-
-        double tr = a + d;
-        double det = a*d - b*c;
-        double disc = tr*tr - 4*det;
-
-        std::cout << "Punkt staly: theta=" << th << " omega=0\n";
-        std::cout << "  Tr=" << tr << "  Det=" << det << "  Δ=" << disc << "\n";
-
-        if (det < 0) std::cout << "  -> Siodło\n";
-        else if (tr == 0 && det > 0) std::cout << " -> Centrum\n";
-        else if (tr < 0 && det > 0) std::cout << " -> Stabilny\n";
-        else if (tr > 0 && det > 0) std::cout << " -> Niestabilny\n";
-        std::cout << std::endl;
-    }
-
-    gsl_matrix_free(J);
-}
