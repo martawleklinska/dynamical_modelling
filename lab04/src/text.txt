@@ -1,0 +1,177 @@
+Świetne pytanie — to klasyczne, ale **nieliniowe i ciekawe** zadanie z teorii układów dynamicznych.
+Poniżej masz **kompletne rozwiązanie krok po kroku (1a–1d)** z objaśnieniami, tak byś mogła je też łatwo przenieść do sprawozdania.
+
+---
+
+## 🔹 Równanie:
+
+[
+\begin{cases}
+\dot{x} = -2y - x , \big[(x^2 + y^2)^2 - 4(x^2 + y^2) + 1\big], \
+\dot{y} = 2x - y , \big[(x^2 + y^2)^2 - 4(x^2 + y^2) + 1\big].
+\end{cases}
+\tag{1}
+]
+
+---
+
+## 🟩 (a) Punkty stałe i stabilność
+
+Punkt stały to taki ((x^*, y^*)), że:
+[
+\dot{x} = 0, \quad \dot{y} = 0.
+]
+
+Oznaczmy:
+[
+r^2 = x^2 + y^2, \quad
+F(r) = (r^2)^2 - 4r^2 + 1 = r^4 - 4r^2 + 1.
+]
+
+Układ można zapisać jako:
+[
+\begin{cases}
+\dot{x} = -2y - xF(r), \
+\dot{y} = 2x - yF(r).
+\end{cases}
+]
+
+### Krok 1. Warunki równowagi
+
+Zauważmy, że układ ma postać rotacji z tłumieniem (F(r)):
+
+Z drugiego równania widzimy, że (\dot{x} = \dot{y} = 0) wtedy, gdy:
+[
+x = 0, ; y = 0
+]
+lub gdy „efektywne tłumienie” (F(r) = 0) i ((x,y)) leży na okręgu, gdzie część rotacyjna i tłumienie się równoważą.
+
+### Krok 2. Sprawdzenie przypadków:
+
+* Dla (x = y = 0) ⇒ (r = 0).
+  To punkt stały wprost.
+
+* Dla (F(r) = 0):
+  [
+  r^4 - 4r^2 + 1 = 0.
+  ]
+  Niech (u = r^2), wtedy:
+  [
+  u^2 - 4u + 1 = 0 \Rightarrow u = 2 \pm \sqrt{3}.
+  ]
+  Zatem:
+  [
+  r_1 = \sqrt{2 - \sqrt{3}} \approx 0.5176, \quad
+  r_2 = \sqrt{2 + \sqrt{3}} \approx 1.9319.
+  ]
+  Czyli mamy **dwa pierścienie (okręgi) punktów stałych**.
+
+✅ **Punkty stałe:**
+[
+r = 0, \quad r = \sqrt{2 - \sqrt{3}}, \quad r = \sqrt{2 + \sqrt{3}}.
+]
+
+---
+
+## 🟩 (b) Szkic portretu fazowego
+
+* Widać, że układ opisuje **rotację (część z ±2x, ±2y)** oraz **radialne tłumienie** (część z (F(r))).
+* Dla małego (r): (F(r) \approx 1 > 0) → ruch spiralnie **do środka (tłumienie)**.
+* Dla (r \approx 0.5176): (F(r)=0) → stan równowagi na okręgu — możliwy **cykl graniczny stabilny**.
+* Dla (r) między (0.5176) a (1.9319): (F(r) < 0) → tłumienie zmienia znak (trajektorie spiralnie **oddalają się**).
+* Dla (r > 1.9319): (F(r) > 0) → znowu przyciąganie do środka.
+
+📉 **Interpretacja:**
+
+* (r = 0) – niestabilny punkt (źródło spiralne),
+* (r = r_1 \approx 0.5176) – stabilny cykl graniczny,
+* (r = r_2 \approx 1.93) – niestabilny cykl graniczny.
+
+---
+
+## 🟩 (c) Rozwiązania numeryczne
+
+Dla (t \in [0,10]), (y_0 = 0), (x_0 = 0.2, 0.4, 0.5175, 0.5180, 1.0, 1.8, 2.5):
+
+Wyniki numeryczne (np. GSL) powinny pokazać:
+
+| (x_0)    | zachowanie                                                         |
+| -------- | ------------------------------------------------------------------ |
+| 0.2, 0.4 | amplituda rośnie → ruch spiralny na zewnątrz do (r \approx 0.5176) |
+| 0.5175   | pozostaje na cyklu (r \approx 0.5176)                              |
+| 0.5180   | lekko odchodzi na zewnątrz → przyciągany do cyklu zewnętrznego     |
+| 1.0, 1.8 | oddala się do (r \approx 1.93)                                     |
+| 2.5      | po chwili maleje do (r \approx 1.93) (cykl niestabilny)            |
+
+W portrecie fazowym zobaczysz **spiralne tory** dochodzące do cyklu przy (r_1), a potem zewnętrzny pierścień niestabilny.
+
+---
+
+## 🟩 (d) Współrzędne biegunowe
+
+Niech:
+[
+x = r \cos\theta, \quad y = r \sin\theta.
+]
+
+Policzmy pochodne:
+[
+\dot{r} = \frac{x\dot{x} + y\dot{y}}{r}, \quad
+\dot{\theta} = \frac{x\dot{y} - y\dot{x}}{r^2}.
+]
+
+Podstawiamy układ (1):
+
+[
+\begin{cases}
+\dot{r} = -r F(r), \
+\dot{\theta} = 2.
+\end{cases}
+]
+
+czyli:
+
+[
+\boxed{
+\dot{r} = -r\big[(r^2)^2 - 4r^2 + 1\big] = -r (r^4 - 4r^2 + 1), \qquad
+\dot{\theta} = 2.
+}
+]
+
+---
+
+### 🔸 Interpretacja w układzie biegunowym:
+
+* Część kątowa: (\dot{\theta} = 2) → stała prędkość kątowa, ruch obrotowy przeciwnie do ruchu wskazówek zegara.
+* Część radialna: (\dot{r} = -r F(r)).
+
+Zatem:
+
+* (r=0) – punkt stały (niestabilny, bo (\dot{r}>0) dla małego r),
+* (r=r_1 \approx 0.5176) – **stabilny cykl graniczny** ((\dot{r}) zmienia znak z + na −),
+* (r=r_2 \approx 1.93) – **niestabilny cykl graniczny** ((\dot{r}) zmienia znak z − na +).
+
+📈 **Wniosek:**
+Układ ma **dwa cykle graniczne**:
+
+* wewnętrzny stabilny (przyciągający),
+* zewnętrzny niestabilny.
+
+Takie zachowanie to typowy przykład **bifurkacji Hopfa odwróconej**.
+
+---
+
+## ✳️ Podsumowanie
+
+| Element               | Wynik                                                                                    |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| Punkty stałe          | (r=0), (r_1=\sqrt{2-\sqrt{3}}), (r_2=\sqrt{2+\sqrt{3}})                                  |
+| Stabilność            | (r=0) – niestabilny, (r_1) – stabilny cykl graniczny, (r_2) – niestabilny cykl graniczny |
+| Portret fazowy        | spirale + pierścień stabilny                                                             |
+| Współrzędne biegunowe | (\dot{r} = -r(r^4 - 4r^2 + 1)), (\dot{\theta} = 2)                                       |
+| Cykle graniczne       | występują, dwa (jeden stabilny, jeden niestabilny)                                       |
+
+---
+
+Jeśli chcesz, mogę Ci pomóc dodać do Twojego projektu (C++ GSL) funkcję `Solver_ex3` do rozwiązania właśnie **tego układu (1)** — z zapisem wyników do `data/` i możliwością rysowania portretu fazowego oraz trajektorii jak w poprzednich ćwiczeniach.
+Czy chcesz, żebym Ci przygotował gotowy szablon kodu do tego zadania (na wzór `Solver_ex2`)?

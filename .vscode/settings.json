@@ -57,5 +57,6 @@
         "text_encoding": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/home/marta/Documents/studia/dynamical_modelling/lab04"
 }
