@@ -10,18 +10,18 @@ function get_phase_graph()
     Y = [2*x-y*((x^2+y^2)^2-4*(x^2+y^2)+1) for x in xs, y in ys]
  
     
-    mag = sqrt.(X.^2 .+ Y.^2).*30
+    mag = sqrt.(X.^2 .+ Y.^2).*10
     X ./= mag
     Y ./= mag
     
     # ============================================================
-    fig = Figure()
-    ax = Axis(fig[1, 1], xlabel=L"$\dot{x}$", ylabel=L"$\dot{y}$", xlabelsize = 25, limits = ((-1,1), (-1,1)),
+    fig = Figure(size = (600, 450))
+    ax = Axis(fig[1, 1], xlabel=L"$\dot{x}$", ylabel=L"$\dot{y}$", xlabelsize = 25,
     ylabelsize = 25, title=L"\text{ćwiczenie 1b}", titlesize = 25, xticklabelsize = 20, yticklabelsize = 20)
     arrows!(ax, xs, ys, X, Y, arrowsize=8,lengthscale = 1.5, linecolor=:gray, linewidth=8, alpha = 0.6)
     
     # display(fig)
-    save("lab04/graphics/ex1b_male.pdf", fig)
+    save("lab04/graphics/ex1b.pdf", fig)
 end
 get_phase_graph()
 
@@ -268,6 +268,14 @@ get_phase_graph_ex2()
 function ex2_trajs()
     xs = range(-5, 5, length=40)
     us = range(-5, 5, length=40)
+    init_vals = [
+                L"(x_0,\; u_0)=(0.0,\; 4.0)",
+                L"(x_0,\; u_0)=(0.0,\; -4.0)", 
+                L"(x_0,\; u_0)=(-0.7,\; -0.5)",
+                L"(x_0,\; u_0)=(-1.5,\; -3)",
+                L"(x_0,\; u_0)=(1.,\; -3.0)", 
+                L"(x_0,\; u_0)=(0.5,\; -3.)"
+                ]
 
     X = [u for x in xs, u in us]                            # dx/dt = u
     U= [- (2/3) * u^3 + 2 * u - x for x in xs, u in us]   # du/dt = -2/3 u^3 + 2u - x
@@ -277,7 +285,7 @@ function ex2_trajs()
     X ./= mag
     U ./= mag
 
-    fig = Figure(size = (1000, 600))
+    fig = Figure(size = (800, 500))
     ax = Axis(fig[1, 1],
         xlabel=L"$x$", ylabel=L"$u$",xlabelsize = 25, 
         ylabelsize = 25, title=L"\text{ćwiczenie 2: rozwiązania}", titlesize = 25, xticklabelsize = 20, yticklabelsize = 20,
@@ -297,15 +305,17 @@ function ex2_trajs()
 
     for (i, file) in enumerate(files)
         data = readdlm(file, '\t', skipstart=1)
+        label = init_vals[i]
         if size(data, 2) >= 3
             x_vals = data[:, 2]  
             u_vals = data[:, 3]  
-            lines!(ax, x_vals, u_vals, linewidth=4, alpha = 0.7)
+            lines!(ax, x_vals, u_vals, linewidth=4, label = label, alpha = 0.7)
         else
             @warn "cos jest nie tak z $(file) "
         end
     end
-
+    Legend(fig[2,1], ax, orientation=:horizontal, framevisible=false, L"\text{warunki początkowe}", labelsize = 11, titlesize = 25)
+    
     # display(fig)
     save("lab04/graphics/ex2_trajs.pdf", fig)
 end

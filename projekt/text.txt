@@ -1,0 +1,438 @@
+Świetnie — super wybór. Duffing z „kwantowym twistem” daje dokładnie to, co chcesz: fizyczną intuicję, poruszające się trajektorie, analizę stabilności i cały bogaty zestaw fenomenów nieliniowych, a jednocześnie naturalny sposób na pokazanie, jak „kwantowość” zmienia dynamikę (tunelowanie, rozmycie periodycznych orbit, zmiana stabilności). Poniżej masz kompletny, praktyczny plan projektu — od równań, przez analizę, do pomysłów na symulacje klasyczne + kwantowe, listę wykresów i fragmenty kodu które możesz wkleić do swojego repo.
+
+---
+
+# 1) Co to jest Duffing i dlaczego to dobre do projektu
+
+Klasyczny Duffing to nieliniowy oscylator z potencjałem z wyrazem (x^3) albo (x^4). W najpopularniejszej (wymuszonej, tłumionej) postaci:
+[
+\ddot x + 2\zeta \dot x + \alpha x + \beta x^3 = \gamma \cos(\omega t),
+]
+gdzie (\zeta) — tłumienie, (\alpha,\beta) — parametry potencjału, (\gamma) siła wymuszenia.
+Dla (\alpha<0,\ \beta>0) potencjał ma dwie studnie (double well) → naturalne „kuwadraty” do porównania z kwantowym dwustanowym oscyaltorem.
+
+Zalety:
+
+* bogata dynamika: od małych oscylacji, przez rezonanse i bifurkacje, do chaosu,
+* łatwo policzyć punkty stałe, Jacobian, wykresy fazowe i Poincaré,
+* naturalne powiązanie z kwantowym problemem cząstki w podwójnym studniu (tunelowanie, rozkład falowy),
+* efektownie wygląda (trajektorie + Poincaré + diagram bifurkacji).
+
+---
+
+# 2) Plan projektu — co zawrzeć w sprawozdaniu / realizacji
+
+## A. Klasyczna część — analiza i symulacje
+
+1. **Równanie i nieliniowe potencjały**
+   Wybierz postać (sugeruję nieliniową z wymuszeniem):
+   [
+   \ddot x + 2\zeta \dot x - \mu x + \beta x^3 = \gamma \cos(\omega t),
+   ]
+   gdzie przyjmij (\mu >0) i (\beta>0) → (V(x)= -\tfrac{\mu}{2}x^2 + \tfrac{\beta}{4}x^4) (double well).
+   Zapisz jako układ 1. rzędu:
+   [
+   \dot x = v,\qquad \dot v = -2\zeta v + \mu x - \beta x^3 + \gamma\cos(\omega t).
+   ]
+
+2. **Punkty stacjonarne (bez wymuszenia (\gamma=0))**
+   Rozwiąż (\mu x - \beta x^3 = 0) → (x=0), (x=\pm\sqrt{\mu/\beta}). Oblicz Jacobian w każdym i określ stabilność.
+
+3. **Linearyzacja** — Jacobian, wartości własne, klasyfikacja punktów.
+
+4. **Numeryka (GSL / Python / Julia)**
+
+   * Integrator: adaptacyjny RK (np. RK8PD w GSL, w Pythonie `solve_ivp(..., method='RK45'/'DOP853')`).
+   * Parametry startowe: np. (\mu=1.0,\ \beta=1.0,\ \zeta=0.05). Wymuszenie (\gamma) i (\omega) zmieniaj: (\gamma) od 0 do ~1.5, (\omega) np. 0.5–2.0.
+   * Zakres czasu: dość długi (np. 0–1000 okresów wymuszenia dla Poincaré), albo 0–200 s.
+
+5. **Wykresy klasyczne (konieczne):**
+
+   * portrety fazowe ((x,v)) dla różnych (\gamma,\omega),
+   * trajektorie (x(t)), (v(t)),
+   * **mapy Poincaré** (próbkowanie co okres (T=2\pi/\omega)) — idealne do ujawnienia struktur i chaosu,
+   * diagram bifurkacji względem (\gamma) (zbadaj np. amplitudę stałego okresu vs (\gamma)),
+   * (opcjonalnie) lokalne Lyapunov exponents (średnia największa wartość) — do kwantyfikacji chaosu.
+
+6. **Analiza energii**: zdefiniuj energię „bezwymuszeniową”
+   [
+   E = \tfrac{1}{2}v^2 + V(x) = \tfrac{1}{2}v^2 - \tfrac{\mu}{2}x^2 + \tfrac{\beta}{4}x^4.
+   ]
+   Porównaj zachowanie (E(t)) z oraz bez tłumienia/wymuszenia.
+
+7. **Scenariusze badań**:
+
+   * bez wymuszenia ((\gamma=0)): prześledź przejścia (\zeta) małe/duże; stabilność studni itp.
+   * z wymuszeniem: rosnące (\gamma) → subharmonic resonances, okresowość → chaos (np. Feigenbaum).
+   * Poincaré dla (\gamma) poniżej i powyżej progu chaosu.
+
+## B. Kwantowy twist — porównanie z TDSE w potencjale double well
+
+Główna myśl: porównaj klasyczną trajektorię („gdzie porusza się punkt”) z ewolucją **barycentru fali** i rozkładem prawdopodobieństwa w kwantowym problemie:
+[
+i\hbar\frac{\partial}{\partial t}\Psi(x,t) = \left[-\frac{\hbar^2}{2m}\frac{\partial^2}{\partial x^2} + V(x) - x\gamma\cos(\omega t)\right]\Psi(x,t).
+]
+(Użyj (V(x)= -\tfrac{\mu}{2}x^2 + \tfrac{\beta}{4}x^4). Wymuszenie w kwantowym modelu można dodać jako (x\gamma\cos\omega t) lub jako parametryczny driving.)
+
+**Co symulować (numerycznie, prosty, ale wystarczający):**
+
+* użyj *split-operator FFT* (metoda operatora ewolucjnego) w 1D, z dyskretną siatką (x\in[-x_{\max},x_{\max}]),
+* ustaw (\hbar=1,\ m=1) (jednostki bezwymiarowe),
+* początkowy pakiet falowy umieść lokalnie w jednej studni (Gaussian wavepacket centered at (x_0=\sqrt{\mu/\beta}), small width),
+* obserwuj ( \langle x(t)\rangle ), ( \langle p(t)\rangle ), prawdopodobieństwo pozostania w tej studni (P_{\text{left}}(t)=\int_{x<0}|\Psi|^2 dx),
+* zbadaj wpływ wymuszenia ((\gamma,\omega)) i „decoherence-like” efektu (np. prosty dodatek szumu) na przejścia między studniami i porównaj z klasycznymi atraktorami (czy rozkład falowy „rozmywa” chaotyczne regiony?).
+
+**Wyniki do porównania:**
+
+* klasyczne Poincaré vs rozrzut (\langle x \rangle (t)) (czy barycentrum fali „ślizga się” jak klasyczna trajektoria?),
+* czy kwantowe tunelowanie powoduje „przezwyciężenie” barier rozdzielających klas. basins? (np. klasa trajektorii pozostaje w jednej studni, ale kwantowo fale przechodzą),
+* Husimi lub Wigner function snapshots (opcjonalnie) — pokazują „rozmycie” fazy i echa efektów kwantowych.
+
+---
+
+# 3) Propozycje parametrów do symulacji (warto zacząć od tego)
+
+(ustawienia sugerowane do testów i figurek)
+
+Klasyczne:
+
+* (\mu = 1.0), (\beta = 1.0) (studnie w (\pm 1)),
+* (\zeta = 0.05) (słabe tłumienie),
+* (\gamma \in [0, 1.5]) (badanie bifurkacji),
+* (\omega = 1.0) (często używana wartość),
+* początkowe warunki: (x(0)\in{-1.2,-0.5,0,0.5,1.2}), (v(0)\in{-0.5,0,0.5}).
+
+Kwantowe:
+
+* (m=\hbar=1), grid (x\in[-6,6]), (N_x\sim 2048) (lub 1024 dla szybszych testów),
+* dt (TDSE) = 0.005–0.01 (zależnie od gridu), czas symulacji 0–200 (jednostki),
+* początkowy pakiet: Gaussian centered at (x_0 = +1) width (\sigma = 0.2).
+
+Uwaga: split-operator jest stabilny i efektywny.
+
+---
+
+# 4) Konkretne wykresy (lista “must-have” i “nice-to-have”)
+
+**MUST-HAVE**
+
+* portret fazowy ((x,v)) dla kilku (\gamma) (w tym bez wymuszenia),
+* trajektorie (x(t)), (v(t)) dla 4–6 warunków początkowych,
+* Poincaré mapy (próbkowanie co (T=2\pi/\omega)),
+* diagram bifurkacji (np. maksima (x) po transiencji vs (\gamma)),
+* analiza punktów stałych (lista punktów i ich stabilność),
+* kwantowo: (\langle x(t)\rangle) dla falówki z różnym (\gamma) i porównanie do klasyki.
+
+**NICE-TO-HAVE**
+
+* największy wykładniczy współczynnik Lyapunova (numeryczny) → potwierdzenie chaosu,
+* Wigner/Husimi snapshots (porównanie „gdzie jest fala” vs klasyczna trajektoria),
+* animacja porównująca klasyczną trajektorię i rozkład kwantowy.
+
+---
+
+# 5) Krótki szkic implementacji — kodowe fragmenty
+
+Poniżej daję Ci **szkielet kodu** (klasa C++ dla części klasycznej — pasuje do Twojej struktury) oraz **fragment Python** dla split-operator TDSE. Nie uruchamiam niczego tutaj — to gotowe do wklejenia i odpalenia w Twoim środowisku.
+
+### A) C++ — solver Duffing (pasuje do twojego `Solver` stylu)
+
+`solver_duffing.hpp`
+
+```cpp
+#pragma once
+#include <vector>
+#include <string>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv2.h>
+
+class SolverDuffing {
+public:
+    SolverDuffing(double mu=1.0, double beta=1.0, double zeta=0.05,
+                  double gamma=0.2, double omega=1.0);
+    void solve(double t0, double t1, int n_steps, const std::string &prefix);
+    void write_poincare(const std::string &fname); // opcjonalnie
+
+private:
+    static int func(double t, const double y[], double f[], void *params);
+    // params
+    double mu, beta, zeta, gamma, omega;
+};
+```
+
+`solver_duffing.cpp`
+
+```cpp
+#include "solver_duffing.hpp"
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+
+struct DuffParams { double mu, beta, zeta, gamma, omega; };
+
+SolverDuffing::SolverDuffing(double mu_, double beta_, double zeta_,
+                             double gamma_, double omega_) :
+    mu(mu_), beta(beta_), zeta(zeta_), gamma(gamma_), omega(omega_) {}
+
+int SolverDuffing::func(double t, const double y[], double f[], void *params) {
+    (void)params;
+    double x = y[0];
+    double v = y[1];
+    double mu = 1.0; // or pass via params
+    double beta = 1.0;
+    double zeta = 0.05;
+    double gamma = 0.2;
+    double omega = 1.0;
+    // If you want, use DuffParams cast from params
+    f[0] = v;
+    f[1] = -2.0*zeta*v + mu*x - beta*x*x*x + gamma * cos(omega * t);
+    return GSL_SUCCESS;
+}
+
+void SolverDuffing::solve(double t0, double t1, int n_steps, const std::string &prefix) {
+    std::filesystem::create_directories("data");
+    DuffParams p{mu,beta,zeta,gamma,omega};
+    gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+    double h = (t1-t0)/n_steps;
+    gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-8, 1e-8);
+
+    std::vector<std::array<double,2>> initials = {{0.5,0.0}, {-1.0,0.0}, {0.0,0.5}, {1.2,0.0}};
+    for (auto ic : initials) {
+        std::string fname = "data/" + prefix + "_x0_" + std::to_string(ic[0]) + "_v0_" + std::to_string(ic[1]) + ".txt";
+        std::ofstream ofs(fname);
+        ofs << "t\tx\tv\n";
+        double y[2] = {ic[0], ic[1]};
+        double t = t0;
+        for (int i=0;i<=n_steps;++i){
+            double ti = t0 + i*(t1-t0)/n_steps;
+            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
+            if (status != GSL_SUCCESS) { std::cerr<<"GSL error\n"; break; }
+            ofs<<ti<<"\t"<<y[0]<<"\t"<<y[1]<<"\n";
+        }
+        ofs.close();
+    }
+    gsl_odeiv2_driver_free(d);
+}
+```
+
+> Uwaga: w `func` lepiej użyć `params` (rzutowanie) — pokazane uproszczenie dla czytelności.
+
+---
+
+### B) Python — split-operator TDSE (1D) (fragment, użyj numpy+scipy)
+
+`tdse_split.py`
+
+```python
+import numpy as np
+from numpy.fft import fft, ifft, fftshift
+import matplotlib.pyplot as plt
+
+# grid
+Nx = 2048
+xmax = 8.0
+x = np.linspace(-xmax, xmax, Nx)
+dx = x[1]-x[0]
+dk = 2*np.pi/(Nx*dx)
+k = fftshift(np.fft.fftfreq(Nx, d=dx))*2*np.pi
+
+# parameters
+hbar = 1.0
+m = 1.0
+mu = 1.0
+beta = 1.0
+def V(x):
+    return -0.5*mu*x**2 + 0.25*beta*x**4
+
+# initial Gaussian in right well
+x0 = +1.0
+sigma = 0.2
+psi0 = (1/(np.pi*sigma**2))**0.25 * np.exp(-(x-x0)**2/(2*sigma**2))
+psi = psi0/np.sqrt(np.sum(np.abs(psi0)**2)*dx)
+
+# time step
+dt = 0.005
+nsteps = 4000
+
+# precompute operators
+expV = lambda t: np.exp(-1j*(V(x) - x*0.0)*dt/(2*hbar))  # add driving later
+T = np.exp(-1j*(hbar**2 * (k**2) / (2*m))*dt/hbar)
+
+# evolution
+psi_t = psi.copy()
+times = []
+xmean = []
+for n in range(nsteps):
+    # optionally include driving gamma*cos(omega*t) by modifying V or adding linear term
+    psi_t = expV(0) * psi_t
+    psi_k = fft(psi_t)
+    psi_k *= T
+    psi_t = ifft(psi_k)
+    psi_t = expV(0) * psi_t
+    if n%10==0:
+        times.append(n*dt)
+        xmean.append(np.real(np.sum(np.conj(psi_t)*x*psi_t)*dx))
+# plot xmean
+plt.plot(times, xmean)
+plt.xlabel('t'); plt.ylabel('<x>')
+plt.show()
+```
+
+To minimalny przykład. Do dokładnego projektu: dodaj wymuszenie (time-dependent potential), zapisy rozkładów (|\Psi|^2), oblicz (P_{left}(t)), i (opcjonalnie) rysuj Wigner/Husimi.
+
+---
+
+# 6) Harmonogram / co oddać na koniec
+
+* **Analiza** (teoria): równania, punkty stałe, Jacobian, oczekiwane fenomenty — 1–2 strony.
+* **Symulacje klasyczne**: kod, portrety fazowe, Poincaré, bifurkacje, wykresy (x(t)), (v(t)) — lać wykresów, z opisami.
+* **Symulacje kwantowe**: ewolucja TDSE, wykresy (\langle x(t)\rangle), (P_{left}(t)), kilka snapshotów (|\Psi(x,t)|^2).
+* **Porównanie i interpretacja**: kiedy klasyka i kwantum się zgadzają, kiedy się rozjeżdżają (tunelowanie, rozmycie).
+* **Kod i instrukcja**: jak uruchomić, parametry, krótki README.
+
+---
+
+# 7) Uwagi praktyczne i pułapki
+
+* TDSE jest kosztowne (duży Nx, mały dt). Zacznij od Nx=1024 i krótszych czasów.
+* Normalizuj wavepacket po każdej iteracji (numerycznie stabilniej).
+* Przy porównaniach używaj jednostek bezwymiarowych (ustaw (m=\hbar=1)).
+* Poincaré mapy wymagają ignorowania transjentów. Rób zapis dopiero po czasie przejściowym, np. po 200 okresach.
+* Obliczając Lyapunova, użyj standardowej metody „re-normowania” wektora odchylenia.
+
+---
+
+# 8) Przykładowe wnioski / pytania które możesz zadać w pracy
+
+* Jak wzrost (\gamma) zmienia strukturę fazową? Gdzie pojawia się chaos?
+* Czy istnieje region wielostabilny (coexistence): klasycznie różne trajektorie → kwantowo rozkład porozkładny?
+* Jak kwantowe tunelowanie zmienia long-time behaviour (zwłaszcza blisko separatrixów)?
+* Czy kwantowy (\langle x(t)\rangle) śledzi klasyczną trajektorię, i dla jakich parametrów?
+
+---
+
+# 9) Czy chcesz, żebym Ci…
+
+* a) przygotowała gotowy **szkielet repo** (C++ solver + Python plotting + TDSE split-operator) do sklonowania i uruchomienia?
+* b) napisała kod do obliczania Lyapunova / Poincaré (gotowe funkcje)?
+* c) zrobiła przykład wyników (wykresy) dla jednego zestawu parametrów (tylko pliki — nie mogę uruchomić, ale mogę dać kompletny skrypt)?
+
+Powiedz, co wolisz — mogę od razu przygotować pliki (kod + README + przykładowe parametry), albo najpierw rozpisać sekcję „Metody” do Twojego sprawozdania.
+Świetne pytanie — i bardzo trafne, bo właśnie tu leży subtelna różnica między klasycznymi autonomicznymi układami (takimi jak Lorenz, Rössler, Henon–Heiles, itp.) a układami **z jawną zależnością od czasu**, jak ten, o którym rozmawiamy (np. kwantowy oscylator nieliniowy z napędem).
+Zaraz ci to dokładnie rozłożę.
+
+---
+
+## 🔹 1. Co znaczy, że równanie jest jawnie zależne od czasu?
+
+W klasycznym (autonomicznym) przypadku masz coś jak:
+[
+\dot{x} = f(x, y), \quad \dot{y} = g(x, y)
+]
+– czyli pole wektorowe nie zmienia się w czasie.
+Wtedy punkty stałe spełniają po prostu:
+[
+f(x^*, y^*) = 0, \quad g(x^*, y^*) = 0
+]
+i tyle.
+
+Natomiast jeśli masz **układ jawnie zależny od czasu**, np. napędzany oscylator:
+[
+\ddot{x} + \gamma \dot{x} + \omega_0^2 x + \alpha x^3 = F \cos(\Omega t),
+]
+to już:
+[
+\dot{x} = u, \quad \dot{u} = -\gamma u - \omega_0^2 x - \alpha x^3 + F \cos(\Omega t)
+]
+i to oznacza, że **pole wektorowe zależy od (t)**.
+
+Wtedy klasyczne „punkty stałe” **nie istnieją w zwykłym sensie**, bo układ ciągle się zmienia w czasie — siła napędowa wymusza oscylacje.
+Ale można podejść do tego na dwa sposoby 👇
+
+---
+
+## 🔹 2. Dwa sposoby badania stabilności w układzie nieautonomicznym
+
+### (a) **Uśrednienie i rozwiązania okresowe (stan stacjonarny wymuszony)**
+
+Można szukać rozwiązania **okresowego z tą samą częstością co napęd** (czyli „ustalonego cyklu”):
+[
+x(t + T) = x(t), \quad T = \frac{2\pi}{\Omega}
+]
+To rozwiązanie jest odpowiednikiem punktu stałego w przestrzeni rozszerzonej (czas wchodzi jako trzecia zmienna).
+Potem bada się jego stabilność, linearyzując układ wokół tej trajektorii (to tzw. **stabilność Floqueta**).
+
+To jest trochę trudniejsze formalnie, ale nadal numerycznie wykonalne (np. integrujesz i obserwujesz, czy trajektoria przyciąga pobliskie).
+
+---
+
+### (b) **Autonomizacja układu – wprowadzenie fazy napędu jako nowej zmiennej**
+
+Można dodać:
+[
+\dot{\phi} = \Omega
+]
+i zapisać:
+[
+\begin{cases}
+\dot{x} = u, \
+\dot{u} = -\gamma u - \omega_0^2 x - \alpha x^3 + F \cos(\phi), \
+\dot{\phi} = \Omega
+\end{cases}
+]
+
+Teraz masz **3-wymiarowy układ autonomiczny**.
+Wtedy możesz już analizować punkty stałe, ale one występują w przestrzeni ((x, u, \phi)).
+Typowo to prowadzi do tzw. **torusów** (ruchu quasi-okresowego) lub **atraktorów chaotycznych**.
+
+Ten zabieg — dodanie fazy napędu — jest standardowy w badaniach takich układów.
+
+---
+
+## 🔹 3. Poziom trudności
+
+Powiedziałbym, że:
+
+* trudność analityczna: 🔹 **lekko większa** niż klasyczne projekty (jak Henon–Heiles czy Lorenz),
+  bo wymaga myślenia o układach nieautonomicznych lub okresowych stanach ustalonych;
+* trudność numeryczna: 🔹 **porównywalna** – po prostu integrujesz 2–3 równania różniczkowe w czasie i rysujesz portrety fazowe;
+* potencjał wizualny i fizyczny: 🔥 **duży** – można pokazać przejście do chaosu, rezonanse, bifurkacje.
+
+---
+
+## 🔹 4. Jak mogłaby wyglądać realizacja projektu
+
+1. **Równania ruchu:**
+   [
+   \ddot{x} + \gamma \dot{x} + \omega_0^2 x + \alpha x^3 = F \cos(\Omega t)
+   ]
+   — nieliniowy oscylator Duffinga z napędem.
+
+2. **Analiza jakościowa:**
+
+   * zapis w postaci 1. rzędu,
+   * punkty stałe dla przypadku (F=0),
+   * wykres potencjału,
+   * analiza stabilności.
+
+3. **Część numeryczna:**
+
+   * integracja numeryczna dla różnych (F), (\Omega), (\alpha),
+   * wykresy (x(t)), (\dot{x}(t)), portret fazowy,
+   * wykres Poincaré (np. co okres (T = 2\pi/\Omega)).
+
+4. **Obserwacje:**
+
+   * rezonanse, podwójna odpowiedź, chaos dla dużego napędu,
+   * interpretacja fizyczna (drgania wymuszone, energia, wychylenia).
+
+5. **Opcjonalnie:**
+
+   * związek z kwantowym oscylatorem (np. analogia w postaci stanu koherentnego),
+   * albo implementacja w Julia + GSL (tak jak dotychczas).
+
+---
+
+Jeśli chcesz, mogę ci rozpisać konkretny **plan projektu Duffinga z napędem** (w stylu twoich dotychczasowych zadań: równania → analiza → solver → fazowy portret → trajektorie → Poincaré).
+
+Czy chcesz, żebym to rozpisał krok po kroku (wraz z przykładami kodu i strukturą projektu)?
