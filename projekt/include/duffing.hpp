@@ -1,6 +1,7 @@
 #pragma once
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
+#include <string>
 
 struct DuffingParams {
     double zeta, alpha, beta, gamma, omega;
@@ -18,5 +19,5 @@ private:
 public:
     Duffing(double zeta = .05, double alpha = 1., double beta = 1., 
             double gamma = .2, double omega = 1.);
-    void solve();
+    void solve(std::string filename);
 };

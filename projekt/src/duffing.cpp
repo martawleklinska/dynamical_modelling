@@ -21,7 +21,7 @@ int Duffing::func(double t, const double y[], double f[], void *params) {
     return GSL_SUCCESS;
 }
 
-void Duffing::solve() {
+void Duffing::solve(std::string filename) {
     std::filesystem::create_directories("data");
 
     gsl_odeiv2_system sys = {func, nullptr, 2, &p};
@@ -31,10 +31,11 @@ void Duffing::solve() {
         &sys, gsl_odeiv2_step_rk8pd, h, 1e-8, 1e-8);
 
     std::vector<std::array<double, 2>> initials = {
-        {0.5, -2.}, {-1.0, 2.0}, {-1., 0.5}, {0.5, -1.7}};
+        {0.5, -2.}, {-1.0, 2.0}, {-1., 0.5}, {0.5, -1.7},
+        {0.0, 0.2}, {0.0, 0.5}};
 
     for (auto ic : initials) {
-        std::string fname = "data/duff_x0_" + std::to_string(ic[0]) +
+        std::string fname = "data/duff_" + filename +  "_x0_" + std::to_string(ic[0]) +
                             "_v0_" + std::to_string(ic[1]) + ".txt";
         std::ofstream ofs(fname);
         ofs << "t\tx\tv\n";
