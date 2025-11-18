@@ -1,0 +1,361 @@
+Świetnie — zrobimy to krok po kroku i prostym, przejrzystym językiem. Poniżej masz **pełną analizę** (analityczną + co narysować + jakie eksperymenty numeryczne wykonać) dla równania van der Pola
+[
+\ddot x + \varepsilon (x^2-1)\dot x + x = m,
+\tag{1}
+]
+dla dwóch zadanych przypadków (\varepsilon=0) i (\varepsilon=\tfrac12). Na końcu daję też krótkie **gotowce**: (A) mały skrypt w Julii do rysowania wartości własnych (\lambda(m)) (Re i Im) i (B) wskazówki / fragment C++ (w stylu Twojego projektu) do numeryki i rysowania portretów fazowych i trajektorii.
+
+---
+
+# 1. Ustawienie układu równań w postaci pierwszego rzędu
+
+Wprowadźmy zmienną pomocniczą (y=\dot x). Wtedy układ równy jest
+[
+\begin{cases}
+\dot x = y,[4pt]
+\dot y = -\varepsilon (x^2-1),y - x + m.
+\end{cases}
+\tag{2}
+]
+Punkt stały (równowaga) ((x^*,y^*)) spełnia (\dot x=0,\ \dot y=0), więc z (2) mamy
+[
+y^*=0,\qquad x^*=m.
+]
+Zatem dla każdego (m) istnieje dokładnie jeden punkt stały: ((x^*,y^*)=(m,0)).
+
+Macierz Jacobiego w ogólnym punkcie ((x,y)) (dla układu (2)) to
+[
+J(x,y)=
+\begin{pmatrix}
+0 & 1[4pt]
+-1 - 2\varepsilon x y & -\varepsilon (x^2-1)
+\end{pmatrix}.
+]
+W punkcie równowagi ((m,0)) uproszcza się do
+[
+J^* \equiv J(m,0)=
+\begin{pmatrix}
+0 & 1[4pt]
+-1 & -\varepsilon (m^2-1)
+\end{pmatrix}.
+]
+Charakterystyczne równanie dla wartości własnych (\lambda) to
+[
+\lambda^2 + \varepsilon (m^2-1),\lambda + 1 = 0.
+\tag{3}
+]
+
+---
+
+# 2. Analiza wartości własnych i stabilności (ogólny wzór)
+
+Rozwiązania równania (3)
+[
+\lambda_{1,2} = \frac{-\varepsilon (m^2-1) \pm \sqrt{\varepsilon^2 (m^2-1)^2 - 4}}{2}.
+\tag{4}
+]
+Kilka obserwacji ważnych do interpretacji:
+
+* ślad macierzy ( \mathrm{Tr}(J^*) = -\varepsilon (m^2-1)),
+* wyznacznik ( \det(J^*) = 1 >0) (zawsze dodatni),
+* więc znaki własności determinują: przy (\det>0) mamy albo para sprzężonych liczb zespolonych (spirala/centrum) albo dwa rzeczywiste wartości własne tego samego znaku (węzeł).
+* punkt równowagi zmienia stabilność kiedy (\mathrm{Tr}(J^*)) zmienia znak — czyli gdy (m^2-1) zmienia znak, tzn. w (m=\pm 1).
+
+Szczególnie ważne: (\det=1>0) oznacza, że gdy (\mathrm{Tr}=0) (czyli (m=\pm1)), mamy czystą parę wartości (\lambda=\pm i) tylko dla (\varepsilon=0); dla (\varepsilon\neq0) w parametrze przejście znaku śladu przy stałym dodatnim detencie to **Hopf** (możliwe pojawienie się/zanik stabilnego cyklu granicznego).
+
+---
+
+# 3. Przypadek A: (\varepsilon=0)
+
+Podstawiając (\varepsilon=0) równanie (3) upraszcza się do
+[
+\lambda^2 + 1 = 0 \quad\Rightarrow\quad \lambda = \pm i.
+]
+Wnioski:
+
+* dla każdego (m) punkt równowagi ((m,0)) ma dwie czysto urojone wartości własne (\pm i).
+* liniowy układ jest więc **centrum** (neutralna oscylacja) — w układzie liniowym rozwiązania są periodyczne i nie ma asymptotycznej stabilności ani niestabilności.
+* **brak** bifurkacji w sensie zmiany stabilności: mimo że położenie równowagi przesuwa się w zależności od (m), charakter liniowy pozostaje centrum (marginalnie stabilny). (Uwaga: dla nieliniowego przypadku (\varepsilon\neq0) sytuacja się zmienia.)
+
+Równania mają analityczne rozwiązania: dla (\varepsilon=0),
+[
+\ddot x + x = m \ \Longrightarrow\ x(t)=m + A\cos(t)+B\sin(t),
+]
+czyli ruch to oscylacja wokół stałej wartości (m).
+
+**Co rysować/udowodnić** dla (\varepsilon=0):
+
+* wykres (\mathrm{Re},\lambda(m)=0) i (\mathrm{Im},\lambda(m)=\pm 1) (stałe) — pokaż, że Re=0 wszędzie; Im stałe ±1,
+* kilka portretów fazowych i trajektorii: przesunięte centra (oscylacje wokół (x=m)).
+
+---
+
+# 4. Przypadek B: (\varepsilon=\tfrac12)
+
+Podstaw na (\varepsilon=\tfrac12) do wzoru (3):
+[
+\lambda^2 + \tfrac12 (m^2-1)\lambda + 1 = 0.
+]
+Wartości własne:
+[
+\lambda_{1,2} = \frac{ -\tfrac12 (m^2-1) \pm \sqrt{ \tfrac14 (m^2-1)^2 - 4 } }{2}
+= -\tfrac14 (m^2-1) \pm \tfrac12\sqrt{ \tfrac14 (m^2-1)^2 - 4 }.
+]
+(Dla praktyki lepiej użyć postaci (4) z (\varepsilon=1/2).)
+
+Kluczowe kryteria stabilności:
+
+* ślad (= -\tfrac12 (m^2-1)).
+
+  * Jeśli (m^2>1) (czyli (|m|>1)) wtedy (m^2-1>0) ⇒ ślad (<0) ⇒ suma wartości własnych ujemna ⇒ tendencja do stabilności (gdy przy tym są zespolone z ujemnym Re ⇒ **stabilne ognisko**).
+  * Jeśli (m^2<1) (czyli (|m|<1)) wtedy (m^2-1<0) ⇒ ślad (>0) ⇒ suma wartości własnych dodatnia ⇒ jeśli zespolone z dodatnim Re ⇒ **niestabilne ognisko**.
+* discriminant (\Delta_{\lambda} = \varepsilon^2(m^2-1)^2 - 4).
+
+  * jeśli (\Delta_{\lambda}<0) ⇒ para zespolona (\Rightarrow) spiralny charakter (ognisko),
+  * jeśli (\Delta_{\lambda}>0) ⇒ dwie rzeczywiste wartości własne (\Rightarrow) węzeł (oba ujemne lub oba dodatnie w zależności od śladu).
+
+Ponieważ (\det=1>0), przejście znaku śladu w (m^2=1) (tj. (m=\pm 1)) to typowy warunek Hopfa: w okolicy (m=\pm 1) równowaga zmienia stabilność i przy (\varepsilon>0) mamy standardowy **(supercritical) Hopf**: dla (|m|<1) równowaga jest niestabilna i pojawia się (dla małego (\varepsilon>0)) **stabilny cykl graniczny**; dla (|m|>1) równowaga staje się stabilna a cykl znika. (To jest dokładnie zachowanie van der Pola: bez przesunięcia (m=0) mamy limitycykliczne; tutaj przesunięcie (m) steruje czy równowaga jest w strefie „wewnątrz” czy „na zewnątrz” Hopfa.)
+
+**Konkretnie dla (\varepsilon=\tfrac12):**
+
+* Dla (|m|<1): (\mathrm{Tr}>0) ⇒ równowaga ((m,0)) **niestabilna**. Oczekujemy powstania **stabilnego cyklu granicznego** przy typowym van der Polu (tzn. rozwiązania zbiegną do oscylacji o pewnej amplitudzie).
+* Dla (|m|>1): (\mathrm{Tr}<0) ⇒ równowaga **stabilna** (ognisko) — rozpędzenia tlumią się i rozwiązania dążą do tej równowagi.
+* Dla (|m|=1): (\mathrm{Tr}=0) — moment przebiegu bifurkacji Hopfa.
+
+**Co rysować/zbadać numerycznie dla (\varepsilon=\tfrac12):**
+
+1. wykresy (\operatorname{Re}\lambda(m)) i (\operatorname{Im}\lambda(m)) dla (m\in[0,3]) (albo od (-3) do (3)); zaznacz punkty (m=\pm1).
+
+   * pokaż, że Re(\lambda) zmienia znak w (m=1), Im(\lambda) zanika gdy dyskryminant staje się dodatni — rozgraniczenie spiral/węzeł.
+2. portrety fazowe (pole wektorowe) i kilka trajektorii numerycznych dla reprezentatywnych (m):
+
+   * przykładowe (m): (0.0,\ 0.5,\ 0.9,\ 1.0,\ 1.1,\ 1.5,\ 2.0).
+   * dla (m<1) pokaż: rozwiązania od różnych IC zbiegają do tej samej **natężonej oscylacji** (limit cycle) — narysuj (x(t)) i fazę ((x,\dot x)).
+   * dla (m>1) pokaż: trajektorie zbieżne do punktu ((m,0)).
+3. Jeśli chcesz, policz amplitudę cyklu granicznego (np. amplitudę (x) w stanie stacjonarnym) jako funkcję (m) dla (|m|<1) i narysuj to — to ładny panel w raporcie.
+
+---
+
+# 5. Krótkie podsumowanie (intuicja fizyczna)
+
+* (\varepsilon=0): układ to harmoniczny oscylator przesunięty o (m). Równowagi są „centrami” — brak asymptotycznej stabilności; rozwiązania periodyczne.
+* (\varepsilon>0) ma efekt nieliniowego tłumienia/antytłumienia: gdy (|x|<1) term (\varepsilon(x^2-1)) jest **ujemny** ⇒ daje antytłumienie (wzmacnia oscylacje), gdy (|x|>1) jest dodatni ⇒ tłumi (hamuje duże oscylacje). To daje w efekcie **limit cycle**: oscylacje o określonej amplitudzie. Parametr (m) przesuwa położenie równowagi; kiedy |m| rośnie powyżej 1 równowaga staje się stabilna i cykl znika — stąd Hopf.
+
+---
+
+# 6. Co dokładnie narysować w raporcie (lista kontrolna)
+
+Dla każdego przypadku (\varepsilon) (0 i 1/2) zrób:
+
+A. **Analiza analityczna**:
+
+* wyprowadzenie punktu równowagi (x^*=m),
+* Jacobian i równanie charakterystyczne (podaj wzór (3)),
+* wzory na wartości własne i warunek zmiany znaku trace (m=±1).
+
+B. **Wykresy (\Re\lambda(m)) i (\Im\lambda(m))** dla (m\in[0,3]) (i opcjonalnie ([-3,3])). Osobne linie: Re i Im (gdy Im=0 pokaz realne (\lambda)). Zaznacz (m=1).
+
+C. **Portrety fazowe** (pole wektorowe) i nałożone 4–6 trajektorii numerycznych:
+
+* dla (\varepsilon=0): pokaż przesunięte periodyczne trajektorie wokół (x=m).
+* dla (\varepsilon=\tfrac12): pokaż przykłady z obu stron bifurkacji: dla (m=0,;0.5,;0.9) (limit cycle), dla (m=1.1,;1.5,;2) (zbieganie do punktu).
+
+D. **Wykresy czasowe** (x(t)) i (\dot x(t)) dla kilku IC (pokazują ustalenie amplitudy lub zbieżność).
+
+E. (opcjonalnie) **amplituda stacjonarna** (np. max (x) w okresie długim) vs (m) w przedziale ([0,1]).
+
+F. Krótkie interpretacyjne wnioski: co się dzieje gdy (m) rośnie; identyfikacja Hopf w (m=\pm1) i jego charakter (supercritical — powstaje stabilny limit cycle dla (|m|<1) jeśli (\varepsilon>0)).
+
+---
+
+# 7. Gotowy skrypt: Julia do rysowania (\Re\lambda(m)) i (\Im\lambda(m))
+
+Wklej to do pliku `plot_lambda.jl` i uruchom (w Julii). Rysuje Re i Im dla (\varepsilon=0) i (\varepsilon=1/2).
+
+```julia
+using CairoMakie, LinearAlgebra
+
+function lambda_vs_m(ε; mmin=0.0, mmax=3.0, n=800)
+    ms = range(mmin, mmax, length=n)
+    re = zeros(n); im = zeros(n)
+    re2 = zeros(n); im2 = zeros(n)
+    for (i,m) in enumerate(ms)
+        # eigenvals from lambda^2 + ε(m^2-1)λ + 1 = 0
+        a = 1.0
+        b = ε*(m^2 - 1.0)
+        c = 1.0
+        disc = b^2 - 4*a*c
+        if disc >= 0
+            λ1 = (-b + sqrt(disc))/(2a)
+            λ2 = (-b - sqrt(disc))/(2a)
+            re[i] = real(λ1); im[i] = imag(λ1)
+            re2[i] = real(λ2); im2[i] = imag(λ2)
+        else
+            # complex conjugate pair
+            realpart = -b/(2a)
+            imagpart = sqrt(-disc)/(2a)
+            re[i] = realpart; im[i] = imagpart
+            re2[i] = realpart; im2[i] = -imagpart
+        end
+    end
+    return ms, re, im, re2, im2
+end
+
+# przykład rysunku
+for ε in (0.0, 0.5)
+    ms, r1, im1, r2, im2 = lambda_vs_m(ε; mmin=0.0, mmax=3.0, n=800)
+    fig = Figure(resolution=(1000,600))
+    ax = Axis(fig[1,1], xlabel="m", title="Eigenvalues vs m (ε=$(ε))")
+    lines!(ax, ms, r1, label="Re λ1")
+    lines!(ax, ms, r2, linestyle=:dash, label="Re λ2")
+    lines!(ax, ms, im1, color=:red, label="Im λ1")
+    lines!(ax, ms, im2, color=:red, linestyle=:dash, label="Im λ2")
+    hlines!(ax, [0.0], color=:black, linestyle=:dot)
+    axislegend(ax)
+    display(fig)
+end
+```
+
+Ten skrypt pokaże wyraźnie przejście Re(\lambda) przez zero przy (m=1) dla (\varepsilon=1/2), a dla (\varepsilon=0) zobaczysz Re identycznie 0, Im ±1.
+
+---
+
+# 8. Fragment C++ (GSL) — jak zintegrować i zapisać trajektorie / portrety fazowe
+
+Poniżej `Solver_vdP` w Twoim stylu. Umieść w `solver_vdp.cpp` i `solver_vdp.hpp` analogicznie do poprzednich klas. (Zakładam, że masz już ustawione mechanizmy zapisywania plików do `data/` i wykorzystywania GSL.)
+
+**nagłówek (fragment)** `solver_vdp.hpp`
+
+```cpp
+#pragma once
+#include <vector>
+#include <array>
+#include <string>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_odeiv2.h>
+
+struct VdPParams { double eps; double m; };
+
+class SolverVdP {
+private:
+    static int func(double t, const double y[], double f[], void *params);
+    VdPParams p;
+    double t0 = 0.0;
+    double t1 = 200.0;   // dostosuj (dużo okresów)
+    int n_steps = 20000;
+public:
+    SolverVdP(double eps=0.5, double m=0.0) { p.eps = eps; p.m = m; }
+    void set_params(double eps_, double m_) { p.eps = eps_; p.m = m_; }
+    void solve_trajectories(const std::vector<std::array<double,2>> &initials,
+                            const std::string &out_prefix);
+    void write_vector_field(double xmin, double xmax, int nx,
+                            double ymin, double ymax, int ny,
+                            const std::string &fname);
+};
+```
+
+**implementacja (fragment)** `solver_vdp.cpp`
+
+```cpp
+#include "solver_vdp.hpp"
+#include <fstream>
+#include <filesystem>
+#include <cmath>
+#include <iostream>
+
+int SolverVdP::func(double t, const double y[], double f[], void *params){
+    (void)(t);
+    auto *pp = static_cast<VdPParams*>(params);
+    double eps = pp->eps;
+    double m = pp->m;
+    double x = y[0];
+    double u = y[1];
+    f[0] = u;
+    f[1] = -eps*(x*x - 1.0)*u - x + m;
+    return GSL_SUCCESS;
+}
+
+void SolverVdP::solve_trajectories(const std::vector<std::array<double,2>> &initials,
+                                   const std::string &out_prefix)
+{
+    std::filesystem::create_directories("data");
+    gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+    double h = (t1 - t0) / n_steps;
+    gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-9, 1e-9);
+
+    for (auto ic : initials) {
+        double x0 = ic[0], u0 = ic[1];
+        std::string fname = "data/" + out_prefix + "_x0_" + std::to_string(x0) + "_u0_" + std::to_string(u0) + ".txt";
+        std::ofstream ofs(fname);
+        ofs << "t\tx\tu\n";
+        double t = t0;
+        double y[2] = {x0, u0};
+        for (int i = 0; i <= n_steps; ++i) {
+            double ti = t0 + i * (t1 - t0) / double(n_steps);
+            int status = gsl_odeiv2_driver_apply(d, &t, ti, y);
+            if (status != GSL_SUCCESS) { std::cerr << "GSL error\n"; break; }
+            ofs << ti << "\t" << y[0] << "\t" << y[1] << "\n";
+        }
+        ofs.close();
+    }
+    gsl_odeiv2_driver_free(d);
+}
+
+void SolverVdP::write_vector_field(double xmin, double xmax, int nx,
+                                   double ymin, double ymax, int ny,
+                                   const std::string &fname)
+{
+    std::ofstream ofs(fname);
+    ofs << "x\tu\txdot\udot\n";
+    for (int i=0;i<nx;i++){
+        double x = xmin + i*(xmax-xmin)/(nx-1);
+        for (int j=0;j<ny;j++){
+            double u = ymin + j*(ymax-ymin)/(ny-1);
+            double xdot = u;
+            double udot = -p.eps*(x*x-1.0)*u - x + p.m;
+            ofs << x << "\t" << u << "\t" << xdot << "\t" << udot << "\n";
+        }
+    }
+    ofs.close();
+}
+```
+
+**Jak uruchomić numerykę (propozycja eksperymentów):**
+
+* Dla (\varepsilon=0.5) i poszczególnych (m = {0.0, 0.5, 0.9, 1.0, 1.1, 1.5, 2.0}),
+
+  * ustaw `t1` na np. 200 (dużo czasu), `n_steps` odpowiednio dużą,
+  * w `initials` weź kilka IC np. ((m+0.1,0),(m-0.1,0),(m,0.5),(m, -0.5)),
+  * zapisz trajektorie i rysuj w Julii/Matlab/pyplot portret fazowy z nałożonymi trajektoriami oraz polem wektorowym z `write_vector_field`.
+* Dla (\varepsilon=0) możesz porównać analityczne rozwiązania z numerycznymi (powinny zgadzać).
+
+---
+
+# 9. Kilka dodatknych wskazówek interpretacyjnych / tekst do raportu
+
+Możesz użyć poniższych zdań (gotowe do wklejenia do LaTeX-a) w części „Wnioski / interpre­tacja”:
+
+> Dla (\varepsilon=0) układ redukuje się do liniowego oscylatora (\ddot x + x = m). Każdy punkt równowagi znajduje się w (x=m) i jest centrum liniowym — wartości własne są (\lambda=\pm i), rozwiązania periodyczne i marginalnie stabilne. Nie obserwujemy bifurkacji zmieniających stabilność równowagi.
+>
+> Dla (\varepsilon>0) (tu (\varepsilon=\tfrac12)) równowaga ((x^*,y^*)=(m,0)) ma wartości własne dane równaniem (\lambda^2 + \varepsilon(m^2-1)\lambda + 1=0). Ich część rzeczywista zmienia znak w (m=\pm 1) — jest to warunek Hopfa. Dla (|m|<1) mamy (\mathrm{Tr}(J^*)>0), więc równowaga jest niestabilna i typowo pojawia się stabilny limit cycle (superkrytyczna bifurkacja Hopfa). Dla (|m|>1) równowaga jest stabilna (przyciągająca) i trajektorie z różnych warunków początkowych asymptotycznie do niej dążą. Zatem parametr (m) działa jako parametr bifurkacyjny: zmieniając go przechodzimy pomiędzy reżimem oscylacyjnym (limit cycle) a reżimem spoczynku.
+
+---
+
+# 10. Co zrobić teraz (plan działania)
+
+Jeśli chcesz, mogę:
+
+1. przygotować dla Ciebie **gotowy plik C++** `SolverVdP` skompilowany z Twoim `CMake`, i przykładowy `main.cpp` który:
+
+   * dla listy (m) wykona integrację i zapisze pliki,
+   * zapisze pole wektorowe,
+   * zapisze dane do rysowania wykresów w Julii,
+2. dopisać pełny **skrypt Julii** do wygenerowania:
+
+   * (\Re\lambda(m),\Im\lambda(m)),
+   * portretu fazowego (wektor + trajektorie),
+   * wykresów (x(t)),
+   * wykresu amplitudy limit cycle vs (m),
+3. napisać gotowe akapity LaTeX (wkleić do Twojego sprawozdania) z wynikami analizy i interpretacją Hopf / limit cycle.
+
+Powiedz który z tych punktów chcesz, to wykonam natychmiast (wszystko w tej odpowiedzi — nie będę prosił, żebyś czekała).
