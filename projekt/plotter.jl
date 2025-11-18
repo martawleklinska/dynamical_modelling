@@ -64,26 +64,26 @@ function get_trajectories(p::Params, filename, title)
     end
     Legend(fig[1,2], ax, labelsize = 25)
     # display(fig)
-    save("projekt/graphics/$filename.pdf", fig, pt_per_unit=0.1)
+    save("projekt/graphics/$filename.pdf", fig)
     return fig
 end
 
 p = [Params(0.1, 1.0, 5.0, 0.0, 0.0),
-    # Params(0.1, -1.0, 5.0, 0.0, 0.0),
-    # Params(.1, 1.0, -5.0, 0.0, 0.0),
-    # Params(.1, -1.0, -5.0, 0.0, 0.0),
+    Params(0.1, -1.0, 5.0, 0.0, 0.0),
+    Params(.1, 1.0, -5.0, 0.0, 0.0),
+    Params(.1, -1.0, -5.0, 0.0, 0.0),
     # Params(3., -1.0, -5.0, 0.0, 0.0),
     # Params(3., 1.0, 5.0, 0.0, 0.0),
-    # Params(-0.1, 1.0, 5.0, 0.0, 0.0),
-    # Params(-0.1, -1.0, -5.0, 0.0, 0.0),
+    Params(-0.1, 1.0, 5.0, 0.0, 0.0),
+    Params(-0.1, -1.0, -5.0, 0.0, 0.0),
     # Params(-3., -1.0, -5.0, 0.0, 0.0)
     ]
 filenames = ["ab_pos_zeta_small_",
             "b_pos_a_neg_zeta_small_",
             "a_pos_b_neg_zeta_small_",
             "ab_neg_zeta_small_",
-            "ab_neg_zeta_big_",
-            "ab_pos_zeta_big_",
+            # "ab_neg_zeta_big_",
+            # "ab_pos_zeta_big_",
             "ab_pos_zeta_neg_",
             "ab_neg_zeta_neg_x",
             "ab_neg_zeta_neg_big_"
@@ -92,12 +92,94 @@ titles = [L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; 5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (0.1, \;1.0, \;-5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; -5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (3., \;-1.0, \;-5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
+        #   L"$(\zeta, \; \alpha, \; \beta) = (3., \;-1.0, \;-5.0)$",
+        #   L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
 ]
-for i in eachindex(p)
-    get_trajectories(p[i], filenames[i], titles[i])
+# for i in eachindex(p)
+#     get_trajectories(p[i], filenames[i], titles[i])
+# end
+
+# time dependencies
+function get_time_dependencies(p::Params, filename, title)
+    init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
+     L"(x_0,\;v_0)=(-1.0, \;0.5)", L"(x_0,\;v_0)=(0.5, \;-1.7)",
+     L"(x_0,\;v_0)=(0.0, \;0.1)", L"(x_0,\;v_0)=(0.0, \;-0.5)"]
+
+    # ============================================================
+    fig = Figure(size = (1000, 500))
+    ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-1.2, 1.2)),
+    ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-2.5, 2.7)),
+    ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    
+    # ============================================================
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/"
+    begin_file = "duff_$filename"
+
+    files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
+
+    println("Found $(length(files)) data files:")
+    foreach(println, files)
+
+    # cm = cgrad(:RdYlBu_11, 6)
+    # cm = cgrad(:RdBu_6, 6)
+    cm = cgrad(:Dark2_6, length(files))
+    for (i, file) in enumerate(files)
+        data = readdlm(file, '\t', skipstart=1)
+        label = init_vals[i]
+        if size(data, 2) >= 3
+            x_vals = data[:, 2]  
+            v_vals = data[:, 3]  
+            t_vals = data[:, 1]
+            lines!(ax, t_vals, x_vals, linewidth=4, label = label, alpha = 0.7, color = cm[i])
+            lines!(ax2, t_vals, v_vals, linewidth=4, label = label, alpha = 0.7, color = cm[i])
+        else
+            @warn "cos jest nie tak z $(file) "
+        end
+    end
+
+    Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
+    # display(fig)
+    save("projekt/graphics/time$filename.pdf", fig)
+    return fig
 end
+
+# for i in eachindex(p)
+#     get_time_dependencies(p[i], filenames[i], titles[i])
+# end
+
+##
+using CairoMakie, DelimitedFiles, FilePathsBase
+
+function plot_bifur(out_prefix)
+    poincare_file = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/$(out_prefix)_bifur_poincare.txt"
+    amp_file = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/$(out_prefix)_bifur_amp.txt"
+
+    # load poincare
+    data_p = readdlm(poincare_file, '\t', comments=true)
+    gammas_p = data_p[:,1]
+    xs_p = data_p[:,3]
+
+    fig = Figure(resolution=(1000,600))
+    ax = Axis(fig[1,1], xlabel="gamma", ylabel="x (Poincare)",
+              title="Poincare map (stroboscopic samples)")
+    scatter!(ax, gammas_p, xs_p, markersize=5.5, color=:black)
+    display(fig)
+
+    # # now amplitude
+    # data_a = readdlm(amp_file, '\t', comments=true)
+    # gam = data_a[:,1]
+    # amp = data_a[:,2]
+
+    # fig2 = Figure(resolution=(1000,400))
+    # ax2 = Axis(fig2[1,1], xlabel="gamma", ylabel="avg period max x",
+    #            title="Bifurcation: amplitude vs gamma")
+    # lines!(ax2, gam, amp, linewidth=2)
+    # scatter!(ax2, gam, amp, markersize=3)
+    # display(fig2)
+end
+
+plot_bifur("duffing")  # dostosuj prefiks do tego co zapisałeś

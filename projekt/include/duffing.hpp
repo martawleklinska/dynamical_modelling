@@ -20,4 +20,16 @@ public:
     Duffing(double zeta = .05, double alpha = 1., double beta = 1., 
             double gamma = .2, double omega = 1.);
     void solve(std::string filename);
+
+    void poincare_map(double gamma_val,
+                      double discard_transient,
+                      int n_periods_sample,
+                      const std::string &out_prefix,
+                      double t0_override = -1.0);
+
+    void bifurcation_scan(double gamma_min, double gamma_max, int n_gamma,
+                          double discard_transient, int samples_per_gamma,
+                          const std::string &out_prefix,
+                          double t0_override = -1.0);
+
 };

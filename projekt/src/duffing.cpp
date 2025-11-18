@@ -4,6 +4,8 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
+#include <iomanip>
 #include <cmath>
 #include <array>
 
@@ -55,5 +57,54 @@ void Duffing::solve(std::string filename) {
         ofs.close();
     }
 
+    gsl_odeiv2_driver_free(d);
+}
+
+void Duffing::poincare_map(double gamma_val,
+                           double discard_transient,
+                           int n_periods_sample,
+                           const std::string &out_prefix,
+                           double t0_override)
+{
+    p.gamma = gamma_val;
+    double T = 2.0 * M_PI / p.omega;
+
+    gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+    double h = (t1 - t0) / n_steps;
+    gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-9, 1e-9);
+
+    std::vector<std::array<double,2>> initials = {
+        {0.5, 0.0} 
+    };
+
+    std::string fname = "data/" + out_prefix + "_poincare.txt";
+    std::ofstream ofs(fname);
+    ofs << "# gamma\tperiod_index\t x\t v\n";
+    ofs << std::setprecision(12);
+
+    for (auto ic : initials) {
+        double y[2] = {ic[0], ic[1]};
+        double t = (t0_override >= 0.0 ? t0_override : t0);
+
+        double t_end_trans = t + discard_transient;
+        int status = gsl_odeiv2_driver_apply(d, &t, t_end_trans, y);
+        if (status != GSL_SUCCESS) {
+            std::cerr << "GSL error during transient (poincare_map) gamma=" << gamma_val << "\n";
+            gsl_odeiv2_driver_free(d);
+            return;
+        }
+
+        for (int n = 1; n <= n_periods_sample; ++n) {
+            double t_target = t_end_trans + n * T;
+            status = gsl_odeiv2_driver_apply(d, &t, t_target, y);
+            if (status != GSL_SUCCESS) {
+                std::cerr << "GSL error during sampling (poincare_map) gamma=" << gamma_val << "\n";
+                break;
+            }
+            ofs << gamma_val << "\t" << n << "\t" << y[0] << "\t" << y[1] << "\n";
+        }
+    }
+
+    ofs.close();
     gsl_odeiv2_driver_free(d);
 }
