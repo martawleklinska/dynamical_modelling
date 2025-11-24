@@ -21,8 +21,7 @@ public:
             double gamma = .2, double omega = 1.);
     void solve(std::string filename);
 
-    void poincare_map(double gamma_val,
-                      double discard_transient,
+    void poincare_map(double discard_transient,
                       int n_periods_sample,
                       const std::string &out_prefix,
                       double t0_override = -1.0);

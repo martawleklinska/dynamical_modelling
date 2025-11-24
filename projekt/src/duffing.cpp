@@ -19,7 +19,7 @@ int Duffing::func(double t, const double y[], double f[], void *params) {
     double v = y[1];
 
     f[0] = v;
-    f[1] = -2.0 * p->zeta * v + p->alpha * x - p->beta * std::pow(x, 3) + p->gamma * std::cos(p->omega * t);
+    f[1] = -2.0 * p->zeta * v - p->alpha * x - p->beta * std::pow(x, 3) + p->gamma * std::cos(p->omega * t);
     return GSL_SUCCESS;
 }
 
@@ -60,13 +60,11 @@ void Duffing::solve(std::string filename) {
     gsl_odeiv2_driver_free(d);
 }
 
-void Duffing::poincare_map(double gamma_val,
-                           double discard_transient,
+void Duffing::poincare_map(double discard_transient,
                            int n_periods_sample,
                            const std::string &out_prefix,
                            double t0_override)
 {
-    p.gamma = gamma_val;
     double T = 2.0 * M_PI / p.omega;
 
     gsl_odeiv2_system sys = {func, nullptr, 2, &p};
@@ -79,7 +77,7 @@ void Duffing::poincare_map(double gamma_val,
 
     std::string fname = "data/" + out_prefix + "_poincare.txt";
     std::ofstream ofs(fname);
-    ofs << "# gamma\tperiod_index\t x\t v\n";
+    ofs << "# period_index\t x\t v\n";
     ofs << std::setprecision(12);
 
     for (auto ic : initials) {
@@ -89,7 +87,7 @@ void Duffing::poincare_map(double gamma_val,
         double t_end_trans = t + discard_transient;
         int status = gsl_odeiv2_driver_apply(d, &t, t_end_trans, y);
         if (status != GSL_SUCCESS) {
-            std::cerr << "GSL error during transient (poincare_map) gamma=" << gamma_val << "\n";
+            std::cerr << "GSL error during transient (poincare_map) \n";
             gsl_odeiv2_driver_free(d);
             return;
         }
@@ -98,10 +96,10 @@ void Duffing::poincare_map(double gamma_val,
             double t_target = t_end_trans + n * T;
             status = gsl_odeiv2_driver_apply(d, &t, t_target, y);
             if (status != GSL_SUCCESS) {
-                std::cerr << "GSL error during sampling (poincare_map) gamma=" << gamma_val << "\n";
+                std::cerr << "GSL error during sampling (poincare_map) \n";
                 break;
             }
-            ofs << gamma_val << "\t" << n << "\t" << y[0] << "\t" << y[1] << "\n";
+            ofs << n << "\t" << y[0] << "\t" << y[1] << "\n";
         }
     }
 
