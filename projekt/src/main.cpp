@@ -2,9 +2,14 @@
 #include <iostream>
 #include <cmath>
 
+void get_time_dependent_solver();
+
 int main() {
+    //
+    get_time_dependent_solver();
+    //
     // std::cout << "get poincare"<< std::endl;
-    Duffing du(0.1, -1.0, 0.25, 2.5, 2.0); // zeta, alpha, beta, gamma, omega
+    // Duffing du(0.1, -1.0, 0.25, 2.5, 2.0); // zeta, alpha, beta, gamma, omega
     
     // double T = 2.0 * M_PI / 2.0;  
     // std::cout << "Period T = " << T << " seconds" << std::endl;
@@ -13,9 +18,9 @@ int main() {
     //                 50000,     // 50 samples instead of 200
     //                 "poincare1");
     // {
-        std::cout << "zeta=0.1, alpha = 1.0, beta = 5.0\n";
-        Duffing duff(0.1, -1.0, 0.25, 2.5, 2.0);
-        duff.solve("lapunow2");
+        // std::cout << "zeta=0.1, alpha = 1.0, beta = 5.0\n";
+        // Duffing duff(0.1, -1.0, 0.25, 2.5, 2.0);
+        // duff.solve("lapunow2");
     // }
     // du.bifurcation_scan(0.0, 1.0, 200,   // gamma_min, gamma_max, n_gamma
     //                     200.0, 50,       // discard_transient, samples_per_gamma

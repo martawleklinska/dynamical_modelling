@@ -12,9 +12,14 @@ struct Params
 end
 
 function get_trajectories(p::Params, filename, title)
-    init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
-     L"(x_0,\;v_0)=(-1.0, \;0.5)", L"(x_0,\;v_0)=(0.5, \;-1.7)",
-     L"(x_0,\;v_0)=(0.0, \;0.1)", L"(x_0,\;v_0)=(0.0, \;-0.5)"]
+    init_vals = [
+        L"(x_0,\;v_0)=(-1.0, \;0.5)", 
+        L"(x_0,\;v_0)=(-1., \;2.0)",
+        L"(x_0,\;v_0)=(0.0, \;0.2)", 
+        L"(x_0,\;v_0)=(0.0, \;0.5)",
+        L"(x_0,\;v_0)=(0.5, \;-1.7)",
+        L"(x_0,\;v_0)=(0.5, \;-2.0)", 
+        ]
     xs = range(-1.2, 1.2, length = 20)
     vs = range(-2., 2., length = 20)
 
@@ -75,12 +80,12 @@ p = [Params(0.1, 1.0, 5.0, 0.0, 0.0),
     ]
 filenames = ["ab_pos_zeta_small_",
             "b_pos_a_neg_zeta_small_",
-            "a_pos_b_neg_zeta_small_",
+            "a_pos_b_neg_zeta_small_",..
             "ab_neg_zeta_small_",
-            "ab_neg_zeta_big_",
+            "ab_neg_zeta_big_",..
             "ab_pos_zeta_big_",
             "ab_pos_zeta_neg_",
-            "ab_neg_zeta_neg_x",
+            "ab_neg_zeta_neg_x",..
             "ab_neg_zeta_neg_big_"
             ]
 titles = [L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
@@ -93,21 +98,25 @@ titles = [L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
 ]
-# for i in eachindex(p)
-#     get_trajectories(p[i], filenames[i], titles[i])
-# end
+for i in eachindex(p)
+    get_trajectories(p[i], filenames[i], titles[i])
+end
 
 # time dependencies
 function get_time_dependencies(p::Params, filename, title)
-    init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
-     L"(x_0,\;v_0)=(-1.0, \;0.5)", L"(x_0,\;v_0)=(0.5, \;-1.7)",
-     L"(x_0,\;v_0)=(0.0, \;0.1)", L"(x_0,\;v_0)=(0.0, \;-0.5)"]
-
+    init_vals = [
+        L"(x_0,\;v_0)=(-1.0, \;0.5)", 
+        L"(x_0,\;v_0)=(-1., \;2.0)",
+        L"(x_0,\;v_0)=(0.0, \;0.2)", 
+        L"(x_0,\;v_0)=(0.0, \;0.5)",
+        L"(x_0,\;v_0)=(0.5, \;-1.7)",
+        L"(x_0,\;v_0)=(0.5, \;-2.0)", 
+        ]
     # ============================================================
     fig = Figure(size = (1000, 500))
-    ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-1.2, 1.2)),
+    ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30, limits = ((-0.1, 10.2), (-1.2, 1.2)),
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
-    ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-2.5, 2.7)),
+    ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30, limits = ((-0.1, 10.2), (-2.5, 2.7)),
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     # ============================================================
@@ -140,9 +149,9 @@ function get_time_dependencies(p::Params, filename, title)
     return fig
 end
 
-# for i in eachindex(p)
-#     get_time_dependencies(p[i], filenames[i], titles[i])
-# end
+for i in eachindex(p)
+    get_time_dependencies(p[i], filenames[i], titles[i])
+end
 
 ## 
 function sila_wymuszajaca(p::Params)
