@@ -101,5 +101,69 @@ function run_ex1()
 end
 
 
-run_ex1()
+# run_ex1()
 
+## ex4: do animation
+function generate_K_gifs()
+    Ks = 0.1:0.1:5.0
+    bs = [0.0, 0.001, 0.01]
+    Ns = 1000
+    discard = 50
+    
+    a_grid = 0.0:0.02:0.98
+    θ0 = 0.5*2π
+
+    mkpath("lab08/gifs/")
+
+    for b in bs
+        filename = "lab08/gifs/poincare_b_$(round(b, digits=3)).gif"
+        
+        fig = Figure(size = (800, 500))
+        title_obs = Observable("Poincaré Map - K=$(round(Ks[1], digits=1)), b=$(round(b, digits=3))")
+        ax = Axis(fig[1,1], 
+                 xlabel = L"\vartheta \text{ mod } 2\pi", 
+                 ylabel = L"L", 
+                 title = title_obs,
+                 ylabelsize = 22, 
+                 xlabelsize = 22, 
+                 titlesize = 22, 
+                 xticklabelsize = 18, 
+                 yticklabelsize = 18,)
+        
+        allθ_obs = Observable(Float64[])
+        allL_obs = Observable(Float64[])
+        
+        scatter_plot = CairoMakie.scatter!(ax, allθ_obs, allL_obs, markersize=2, color=:blue)
+        
+        xlims!(ax, 0, 2π)
+        ylims!(ax, -2π+2.5, 2π+2.5)
+        
+        println("Generating for b = $b")
+        
+        record(fig, filename, 1:length(Ks), framerate = 9) do i 
+            K = Ks[i]
+            p = MapParams(K, b)
+            
+            empty!(allθ_obs.val)
+            empty!(allL_obs.val)
+            
+            for a in a_grid
+                L0 = a*2π
+                ptsθ, ptsL = poincare_points(θ0, L0, p, N=Ns, discard=discard)
+                append!(allθ_obs.val, ptsθ)
+                append!(allL_obs.val, ptsL)
+            end
+            
+            title_obs[] = "Poincaré Map - K=$(round(K, digits=1)), b=$(round(b, digits=3))"
+            
+            notify(allθ_obs)
+            notify(allL_obs)
+        end
+        
+        println("Saved GIF: $filename")
+    end
+    
+    println("done")
+end
+
+generate_K_gifs()

@@ -80,12 +80,12 @@ p = [Params(0.1, 1.0, 5.0, 0.0, 0.0),
     ]
 filenames = ["ab_pos_zeta_small_",
             "b_pos_a_neg_zeta_small_",
-            "a_pos_b_neg_zeta_small_",..
+            "a_pos_b_neg_zeta_small_",#..
             "ab_neg_zeta_small_",
-            "ab_neg_zeta_big_",..
+            "ab_neg_zeta_big_",#..
             "ab_pos_zeta_big_",
             "ab_pos_zeta_neg_",
-            "ab_neg_zeta_neg_x",..
+            "ab_neg_zeta_neg_x",#..
             "ab_neg_zeta_neg_big_"
             ]
 titles = [L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
