@@ -2,3 +2,6 @@ build/
 projekt/graphics/
 graphics/
 data/
+ex1_prep/
+*.pdf
+.vscode/
