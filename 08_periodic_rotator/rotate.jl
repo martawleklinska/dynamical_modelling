@@ -72,7 +72,7 @@ function run_ex1()
             for (i, (θ0, L0)) in enumerate(initials)
                 θarr, Larr = simulate_traj(θ0, L0, p, N=Ns)
                 n = 0:Ns
-                CairoMakie.scatter!(ax2, n, mod.(θarr, 2π), markersize = 3,  label=L"\theta_n=%$(round(θ0, digits=2))")
+                CairoMakie.scatter!(ax2, n, θarr, markersize = 3,  label=L"\theta_n=%$(round(θ0, digits=2))")
                 CairoMakie.scatter!(ax, n, Larr, label="L_n=$(round(L0, digits=2))", markersize = 3)
             end
             axislegend(ax, labelsize = 20)
@@ -101,7 +101,7 @@ function run_ex1()
 end
 
 
-# run_ex1()
+run_ex1()
 
 ## ex4: do animation
 function generate_K_gifs()
