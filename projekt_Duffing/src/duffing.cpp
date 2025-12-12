@@ -32,9 +32,6 @@ void Duffing::solve(std::string filename) {
     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(
         &sys, gsl_odeiv2_step_rk8pd, h, 1e-8, 1e-8);
 
-    std::vector<std::array<double, 2>> initials = {
-        {0.5, -2.03}, {-1.0, 2.03}, {-1., 0.503}, {0.5, -1.703},
-        {0.0, 0.203}, {0.0, 0.503}};
 
     for (auto ic : initials) {
         std::string fname = "data/duff_" + filename +  "_x0_" + std::to_string(ic[0]) +
@@ -60,52 +57,89 @@ void Duffing::solve(std::string filename) {
     gsl_odeiv2_driver_free(d);
 }
 
-void Duffing::poincare_map(double discard_transient,
-                           int n_periods_sample,
-                           const std::string &out_prefix,
-                           double t0_override)
-{
+void Duffing::poincare_map(double discard_transient, int n_periods_sample, const std::string &out_prefix, double t0_override){
     double T = 2.0 * M_PI / p.omega;
 
     gsl_odeiv2_system sys = {func, nullptr, 2, &p};
     double h = (t1 - t0) / n_steps;
-    gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-9, 1e-9);
-
-    std::vector<std::array<double,2>> initials = {
-        {0.5, 0.0} 
+    gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-09, 1e-09);
+    
+    std::vector<std::array<double, 2>> init_vals = {
+        {0.5, 0.0}
     };
-
     std::string fname = "data/" + out_prefix + "_poincare.txt";
     std::ofstream ofs(fname);
-    ofs << "# period_index\t x\t v\n";
-    ofs << std::setprecision(12);
-
-    for (auto ic : initials) {
+    ofs << "period_idx\t x\t v \n";
+    for (auto ic : init_vals){
         double y[2] = {ic[0], ic[1]};
         double t = (t0_override >= 0.0 ? t0_override : t0);
 
-        double t_end_trans = t + discard_transient;
+        double t_end_trans = t+ discard_transient;
         int status = gsl_odeiv2_driver_apply(d, &t, t_end_trans, y);
-        if (status != GSL_SUCCESS) {
-            std::cerr << "GSL error during transient (poincare_map) \n";
+        if (status != GSL_SUCCESS){
+            std::cerr << "GSL error during transient\n";
             gsl_odeiv2_driver_free(d);
-            return;
+            return ;
         }
-
-        for (int n = 1; n <= n_periods_sample; ++n) {
+        for (int n = 1; n <= n_periods_sample; ++n){
             double t_target = t_end_trans + n * T;
             status = gsl_odeiv2_driver_apply(d, &t, t_target, y);
-            if (status != GSL_SUCCESS) {
-                std::cerr << "GSL error during sampling (poincare_map) \n";
-                break;
+            if (status != GSL_SUCCESS){
+                std::cerr << "GLS error furing sampling\n";
+                break ;
             }
-            ofs << n << "\t" << y[0] << "\t" << y[1] << "\n";
+            ofs << n << "\t" << y[0] << "\t" << y[1] << "\n"; 
         }
     }
-
     ofs.close();
     gsl_odeiv2_driver_free(d);
 }
+// void Duffing::poincare_map(double discard_transient,
+//                            int n_periods_sample,
+//                            const std::string &out_prefix,
+//                            double t0_override)
+// {
+//     double T = 2.0 * M_PI / p.omega;
+
+//     gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+//     double h = (t1 - t0) / n_steps;
+//     gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, gsl_odeiv2_step_rk8pd, h, 1e-9, 1e-9);
+
+//     std::vector<std::array<double,2>> initials = {
+//         {0.5, 0.0} 
+//     };
+
+//     std::string fname = "data/" + out_prefix + "_poincare.txt";
+//     std::ofstream ofs(fname);
+//     ofs << "# period_index\t x\t v\n";
+//     ofs << std::setprecision(12);
+
+//     for (auto ic : initials) {
+//         double y[2] = {ic[0], ic[1]};
+//         double t = (t0_override >= 0.0 ? t0_override : t0);
+
+//         double t_end_trans = t + discard_transient;
+//         int status = gsl_odeiv2_driver_apply(d, &t, t_end_trans, y);
+//         if (status != GSL_SUCCESS) {
+//             std::cerr << "GSL error during transient (poincare_map) \n";
+//             gsl_odeiv2_driver_free(d);
+//             return;
+//         }
+
+//         for (int n = 1; n <= n_periods_sample; ++n) {
+//             double t_target = t_end_trans + n * T;
+//             status = gsl_odeiv2_driver_apply(d, &t, t_target, y);
+//             if (status != GSL_SUCCESS) {
+//                 std::cerr << "GSL error during sampling (poincare_map) \n";
+//                 break;
+//             }
+//             ofs << n << "\t" << y[0] << "\t" << y[1] << "\n";
+//         }
+//     }
+
+//     ofs.close();
+//     gsl_odeiv2_driver_free(d);
+// }
 
 
 void Duffing::bifurcation_scan(double gamma_min, double gamma_max, int n_gamma,

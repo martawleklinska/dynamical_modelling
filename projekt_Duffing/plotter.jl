@@ -35,7 +35,7 @@ function get_trajectories(p::Params, filename, title)
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     arrows!(ax, xs, vs, X, V, arrowsize=8, lengthscale = 1.5, linecolor=:gray, linewidth=8, alpha = 0.6)
     # ============================================================
-    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/"
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     begin_file = "duff_$filename"
 
     files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
@@ -64,45 +64,48 @@ function get_trajectories(p::Params, filename, title)
     end
     Legend(fig[1,2], ax, labelsize = 25)
     # display(fig)
-    save("projekt/graphics/$filename.pdf", fig)
+    save("projekt_Duffing/graphics/$filename.pdf", fig)
     return fig
 end
 
-p = [Params(0.1, 1.0, 5.0, 0.0, 0.0),
-    Params(0.1, -1.0, 5.0, 0.0, 0.0),
+p = [
+    # Params(0.1, 1.0, 5.0, 0.0, 0.0),
+    # Params(0.1, -1.0, 5.0, 0.0, 0.0),
     Params(.1, 1.0, -5.0, 0.0, 0.0),
     Params(.1, -1.0, -5.0, 0.0, 0.0),
     Params(3., -1.0, -5.0, 0.0, 0.0),
-    Params(3., 1.0, 5.0, 0.0, 0.0),
-    Params(-0.1, 1.0, 5.0, 0.0, 0.0),
+    # Params(3., 1.0, 5.0, 0.0, 0.0),
+    # Params(-0.1, 1.0, 5.0, 0.0, 0.0),
     Params(-0.1, -1.0, -5.0, 0.0, 0.0),
     Params(-3., -1.0, -5.0, 0.0, 0.0)
     ]
-filenames = ["ab_pos_zeta_small_",
-            "b_pos_a_neg_zeta_small_",
+filenames = [
+    # "ab_pos_zeta_small_",
+            # "b_pos_a_neg_zeta_small_",
             "a_pos_b_neg_zeta_small_",#..
             "ab_neg_zeta_small_",
             "ab_neg_zeta_big_",#..
-            "ab_pos_zeta_big_",
-            "ab_pos_zeta_neg_",
+            # "ab_pos_zeta_big_",
+            # "ab_pos_zeta_neg_",
             "ab_neg_zeta_neg_x",#..
             "ab_neg_zeta_neg_big_"
             ]
-titles = [L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; 5.0)$",
+titles = [  
+        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
+        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; 5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (0.1, \;1.0, \;-5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; -5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (3., \;-1.0, \;-5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;1.0, \;5.0)$",
+        #   L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
+        #   L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
 ]
-for i in eachindex(p)
-    get_trajectories(p[i], filenames[i], titles[i])
-end
+# for i in eachindex(p)
+#     get_trajectories(p[i], filenames[i], titles[i])
+# end
 
-# time dependencies
+## time dependencies
 function get_time_dependencies(p::Params, filename, title)
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
@@ -120,10 +123,10 @@ function get_time_dependencies(p::Params, filename, title)
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     # ============================================================
-    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/"
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     begin_file = "duff_$filename"
 
-    files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
+    files = filter(f -> occursin(begin_file, f) && endswith(f, "00000.txt"), readdir(data_dir; join=true))
 
     println("Found $(length(files)) data files:")
     foreach(println, files)
@@ -145,7 +148,7 @@ function get_time_dependencies(p::Params, filename, title)
 
     Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
     # display(fig)
-    save("projekt/graphics/time$filename.pdf", fig)
+    save("projekt_Duffing/graphics/time$filename.pdf", fig)
     return fig
 end
 
@@ -174,7 +177,7 @@ init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
     ylabelsize = 30, title=L"\zeta=0.05, \; \alpha=-1.0, \; \beta=0.25, \; \omega=2.0, \;\gamma=2.5", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     arrows!(ax, xs, vs, X, V, arrowsize=8, lengthscale = 1.5, linecolor=:gray, linewidth=8, alpha = 0.6)
     # ============================================================
-    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/"
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     begin_file = "b_pos_aneg_zeta05_gamma25_omega2"
 
     files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
@@ -199,7 +202,7 @@ init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
 
     Legend(fig[1,2], ax, labelsize = 25)
     # display(fig)
-    save("projekt/graphics/sila_wymuszajaca_gamma.pdf", fig)
+    save("projekt_Duffing/graphics/sila_wymuszajaca_gamma.pdf", fig)
     return fig
 end
 p = Params(0.05, -1.0, 0.25, 2.5, 2.0)
@@ -220,7 +223,7 @@ function sila_wymuszajaca_time(p::Params)
     ylabelsize = 30, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     # ============================================================
-    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/"
+    data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     begin_file = "b_pos_aneg_zeta05_gamma25_omega2"
 
     files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
@@ -245,7 +248,7 @@ function sila_wymuszajaca_time(p::Params)
 
     Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
     # display(fig)
-    save("projekt/graphics/time-gamma25.pdf", fig)
+    save("projekt_Duffing/graphics/time-gamma25.pdf", fig)
     return fig
 end
 sila_wymuszajaca_time(p)
@@ -264,15 +267,15 @@ function plot_poincare(filename::String)
         x, v, markersize = 4
     )
     # display(fig)
-    save("projekt/graphics/poincare_chaos1.pdf", fig)
+    save("projekt_Duffing/graphics/poincare_chaos1.pdf", fig)
     return fig
 end
-plot_poincare("projekt/build/data/poincare1_poincare.txt")
+plot_poincare("projprojekt_Duffingekt/build/data/poincare1_poincare.txt")
 
 ## LAPUNOV
 function get_lapunow_exponen()
-    data = readdlm("/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/duff_lapunow1_x0_-1.000000_v0_2.000000.txt", comments=true)
-    data2 = readdlm("/home/marta/Documents/studia/dynamical_modelling/projekt/build/data/duff_lapunow2_x0_-1.000000_v0_2.030000.txt", comments=true)
+    data = readdlm("/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/duff_lapunow1_x0_-1.000000_v0_2.000000.txt", comments=true)
+    data2 = readdlm("/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/duff_lapunow2_x0_-1.000000_v0_2.030000.txt", comments=true)
 
     x = data[:, 2]
     v = data[:, 3]
@@ -297,8 +300,8 @@ get_lapunow_exponen()
 using CairoMakie, DelimitedFiles, FilePathsBase
 
 function plot_bifur(out_prefix)
-    poincare_file = "projekt/build/data/$(out_prefix)_bifur_poincare.txt"
-    amp_file = "projekt/build/data/$(out_prefix)_bifur_amp.txt"
+    poincare_file = "projekt_Duffing/build/data/$(out_prefix)_bifur_poincare.txt"
+    amp_file = "projprojekt_Duffingekt/build/data/$(out_prefix)_bifur_amp.txt"
 
     # load poincare
     data_p = readdlm(poincare_file, '\t', comments=true)

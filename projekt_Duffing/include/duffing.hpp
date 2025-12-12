@@ -2,6 +2,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_odeiv2.h>
 #include <string>
+#include<vector>
+#include<array>
 
 struct DuffingParams {
     double zeta, alpha, beta, gamma, omega;
@@ -15,6 +17,9 @@ private:
     double t0 = 0.0;
     double t1 = 10.;
     int n_steps = 10000;
+    std::vector<std::array<double, 2>> initials = {
+        {0.5, -2.0}, {-1.0, 2.0}, {-1., 0.50}, {0.5, -1.70},
+        {0.0, 0.20}, {0.0, 0.50}};
 
 public:
     Duffing(double zeta = .05, double alpha = 1., double beta = 1., 
