@@ -11,4 +11,6 @@ cmake .. && make
 ```
 
 ## TODO
-1. Find how the minimal change in initial conditions affect what;
+1. Add quantum simulations:
+    - solve TDSE;
+    - find how WDF applies here.
