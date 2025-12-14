@@ -31,9 +31,40 @@ public:
                       const std::string &out_prefix,
                       double t0_override = -1.0);
 
-    void bifurcation_scan(double gamma_min, double gamma_max, int n_gamma,
-                          double discard_transient, int samples_per_gamma,
-                          const std::string &out_prefix,
-                          double t0_override = -1.0);
+    void bifurcation_analysis(
+        std::string param_name,      // nazwa parametru: "zeta", "alpha", "beta", "gamma", "omega"
+        double param_min,             // minimalna wartość parametru
+        double param_max,             // maksymalna wartość parametru
+        int n_param_steps,            // liczba kroków parametru
+        std::array<double, 2> ic,     // warunek początkowy {x0, v0}
+        double t_transient = 100.0,   // czas na ustalenie się (transient)
+        int n_periods = 50,           // liczba okresów do zapisania (Poincaré)
+        std::string filename = "bifurcation"
+    );
+    double lyapunov_exponent(
+        std::array<double, 2> ic,     // warunek początkowy
+        double d0 = 1e-8,              // początkowe zaburzenie
+        double t_transient = 100.0,    // czas transjentowy
+        double t_measure = 500.0,      // czas pomiaru
+        int n_renorm = 50000           // liczba renormalizacji
+    );
+    
+    void lyapunov_vs_parameter(
+        std::string param_name,
+        double param_min,
+        double param_max,
+        int n_steps,
+        std::array<double, 2> ic,
+        std::string filename = "lyapunov"
+    );
+    void solve_with_energy(
+        std::string filename,
+        std::array<double, 2> ic = {0.0, 0.0}
+    );
 
+};
+
+struct DuffingParamsWithEnergy {
+    double zeta, alpha, beta, gamma, omega;
+    double *energy_ptr;  
 };
