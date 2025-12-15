@@ -85,9 +85,10 @@ void show_menu_and_execute() {
         std::cout << "3. Bifurcation analysis\n";
         std::cout << "4. Lyapunov exponent analysis\n";
         std::cout << "5. Energy analysis\n";
+        std::cout << "6. Quantum Duffing analysis\n";
         std::cout << "0. Exit\n";
         std::cout << "===============================================\n";
-        std::cout << "Please enter your choice (0-5): ";
+        std::cout << "Please enter your choice (0-6): ";
         
         std::cin >> choice;
         
@@ -107,6 +108,9 @@ void show_menu_and_execute() {
             case 5:
                 run_energy_analysis();
                 break;
+            case 6:
+                run_quantum_analysis();
+                break;
             case 0:
                 std::cout << "Exiting... Thank you for using Duffing Oscillator Solver!\n";
                 continue_running = false;
@@ -118,7 +122,7 @@ void show_menu_and_execute() {
                 break;
         }
         
-        if (continue_running && choice >= 1 && choice <= 4) {
+        if (continue_running && choice >= 1 && choice <= 6) {
             std::cout << "\nPress Enter to return to menu...";
             std::cin.ignore();
             std::cin.get();
@@ -191,15 +195,14 @@ void run_quantum_analysis(){
         512        // N 
     );
     
-    // Początkowy pakiet Gaussowski w lewej studni
     qd.set_initial_gaussian(
-        -1.0,      // x0 (środek pakietu)
-        0.0,       // p0 (pęd początkowy)
-        0.3        // sigma (szerokość pakietu)
+        -1.0,      // x0 
+        0.0,       // p0 
+        0.3        // sigma 
     );
     
-    double dt = 0.01;                    // krok czasowy
-    int n_steps = 5000;                  // liczba kroków (t_max = 50)
-    qd.evolve(dt, n_steps, "duffing", 50);  // zapisuj co 50 kroków
+    double dt = 0.005;                    // krok czasowy
+    int n_steps = 500;                  // liczba kroków (t_max = 50)
+    qd.evolve(dt, n_steps, "duffing", 5);  // zapisuj co 5 kroków
     
 }

@@ -15,7 +15,7 @@ private:
     DuffingParams p; 
 
     double t0 = 0.0;
-    double t1 = 15.;
+    double t1 = 10.;
     int n_steps = 10000;
     std::vector<std::array<double, 2>> initials = {
         {0.5, -2.0}, {-1.0, 2.0}, {-1., 0.50}, {0.5, -1.70},

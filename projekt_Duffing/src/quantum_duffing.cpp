@@ -6,18 +6,19 @@
 #include <iomanip>
 
 QuantumDuffing::QuantumDuffing(
-    double alpha_, double beta_, double gamma_, double omega_,
-    double hbar_, double mass_,
+    double alpha_, double beta_, double gamma_, double omega_, 
+    double hbar_, double mass_, 
     double x_min_, double x_max_, int N_
-) {
+){
     p = {alpha_, beta_, gamma_, omega_, hbar_, mass_, x_min_, x_max_, N_};
-    
+
     setup_grid();
     setup_fftw();
-    
+
     psi.resize(p.N);
     V.resize(p.N);
 }
+
 
 QuantumDuffing::~QuantumDuffing() {
     cleanup_fftw();
@@ -75,7 +76,6 @@ void QuantumDuffing::set_initial_gaussian(double x0, double p0, double sigma) {
         psi[i] = gauss * std::exp(std::complex<double>(0.0, phase));
     }
     
-    // Normalizacja
     double n = norm();
     for (auto &val : psi) val /= std::sqrt(n);
 }
@@ -115,21 +115,22 @@ void QuantumDuffing::apply_kinetic_step(double dt) {
         psi[i] = std::complex<double>(fft_out[i][0], fft_out[i][1]) / double(p.N);
     }
 }
-
 void QuantumDuffing::evolve(double dt, int n_steps, 
                              std::string filename, int save_every) {
     std::filesystem::create_directories("data/quantum");
     
     std::string fname_obs = "data/quantum/" + filename + "_observables.txt";
     std::ofstream ofs_obs(fname_obs);
-    ofs_obs << "# t\t<x>\t<p>\t<E>\tnorm\n";
+    ofs_obs << "# step\tt\t<x>\t<p>\t<E>\tnorm\n";  
     
     double t = 0.0;
+    
+    std::cout << "Initial norm: " << norm() << "\n";
     
     for (int step = 0; step <= n_steps; ++step) {
         if (step % save_every == 0) {
             std::string fname_state = "data/quantum/" + filename + 
-                                       "_step_" + std::to_string(step) + ".txt";
+                                       "_step_" + std::to_string(step / save_every) + ".txt";
             save_state(fname_state, t);
             
             double exp_x = expectation_x();
@@ -137,12 +138,17 @@ void QuantumDuffing::evolve(double dt, int n_steps,
             double exp_E = expectation_energy(t);
             double n = norm();
             
-            ofs_obs << t << "\t" << exp_x << "\t" << exp_p << "\t" 
+            ofs_obs << step << "\t" << t << "\t" << exp_x << "\t" << exp_p << "\t"  
                     << exp_E << "\t" << n << "\n";
             
             std::cout << "Step " << step << "/" << n_steps 
                       << " (t=" << t << "): <x>=" << exp_x 
                       << ", norm=" << n << "\n";
+            
+            if (std::abs(n - 1.0) > 0.01) {
+                std::cerr << "WARNING: Norm deviation at step " << step 
+                          << ": " << n << "\n";
+            }
         }
         
         apply_potential_half_step(dt, t);
@@ -153,7 +159,7 @@ void QuantumDuffing::evolve(double dt, int n_steps,
     }
     
     ofs_obs.close();
-    std::cout << "Quantum evolution completed. Data saved to data/quantum/\n";
+    std::cout << "Quantum evolution completed. Final norm: " << norm() << "\n";
 }
 
 double QuantumDuffing::expectation_x() const {
