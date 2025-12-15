@@ -6,6 +6,7 @@ void run_poincare_analysis();
 void run_bifurcation_analysis();
 void run_lyapunov_analysis();
 void run_energy_analysis();
+void run_quantum_analysis();
 void show_menu_and_execute();
 
 #endif

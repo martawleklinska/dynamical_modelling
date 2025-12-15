@@ -1,5 +1,6 @@
 #include "duffing.hpp"
 #include "user_execute.hpp"
+#include "quantum_duffing.hpp"
 #include <iostream>
 #include <cmath>
 
@@ -174,4 +175,31 @@ void run_energy_analysis(){
     std::cout << "\n======= ENERGY ANALYSIS =======\n";
     Duffing duff(0.15, -1.0, 1.0, 2.5, 1.2);
     duff.solve_with_energy("energy", {0.1, 0.0});
+}
+
+void run_quantum_analysis(){
+    std::cout << "\n ======= TDSE ANALYSIS =======\n";
+    QuantumDuffing qd(
+        -1.0,      // alpha 
+        1.0,       // beta
+        0.3,       // gamma 
+        1.0,       // omega
+        1.0,       // hbar 
+        1.0,       // mass
+        -4.0,      // x_min
+        4.0,       // x_max
+        512        // N 
+    );
+    
+    // Początkowy pakiet Gaussowski w lewej studni
+    qd.set_initial_gaussian(
+        -1.0,      // x0 (środek pakietu)
+        0.0,       // p0 (pęd początkowy)
+        0.3        // sigma (szerokość pakietu)
+    );
+    
+    double dt = 0.01;                    // krok czasowy
+    int n_steps = 5000;                  // liczba kroków (t_max = 50)
+    qd.evolve(dt, n_steps, "duffing", 50);  // zapisuj co 50 kroków
+    
 }

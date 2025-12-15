@@ -1,6 +1,6 @@
 using CairoMakie
 using DelimitedFiles
-
+using FilePathsBase
 ## ====================== DUFFING OSCILLATOR PROJEKT =========================
 
 struct Params
@@ -69,42 +69,43 @@ function get_trajectories(p::Params, filename, title)
 end
 
 p = [
-    # Params(0.1, 1.0, 5.0, 0.0, 0.0),
-    # Params(0.1, -1.0, 5.0, 0.0, 0.0),
-    # Params(.1, 1.0, -5.0, 0.0, 0.0),
-    # Params(.1, -1.0, -5.0, 0.0, 0.0),
-    # Params(3., -1.0, -5.0, 0.0, 0.0),
-    # Params(3., 1.0, 5.0, 0.0, 0.0),
+    Params(0.1, 1.0, 5.0, 0.0, 0.0),
+    Params(0.1, -1.0, 5.0, 0.0, 0.0),
+    Params(.1, 1.0, -5.0, 0.0, 0.0),
+    Params(.1, -1.0, -5.0, 0.0, 0.0),
+    Params(3., -1.0, -5.0, 0.0, 0.0),
+    Params(3., 1.0, 5.0, 0.0, 0.0),
     Params(-0.1, 1.0, 5.0, 0.0, 0.0),
-    # Params(-0.1, -1.0, -5.0, 0.0, 0.0),
-    # Params(-3., -1.0, -5.0, 0.0, 0.0)
+    Params(-0.1, -1.0, -5.0, 0.0, 0.0),
+    Params(-3., -1.0, -5.0, 0.0, 0.0)
     ]
 filenames = [
-    # "ab_pos_zeta_small_",
-    #         "b_pos_a_neg_zeta_small_",
-    #         "a_pos_b_neg_zeta_small_",#..
-    #         "ab_neg_zeta_small_",
-    #         "ab_neg_zeta_big_",#..
-    #         "ab_pos_zeta_big_",
+    "ab_pos_zeta_small_",
+            "b_pos_a_neg_zeta_small_",
+            "a_pos_b_neg_zeta_small_",#..
+            "ab_neg_zeta_small_",
+            "ab_neg_zeta_big_",#..
+            "ab_pos_zeta_big_",
             "ab_pos_zeta_neg_",
-            # "ab_neg_zeta_neg_x",#..
-            # "ab_neg_zeta_neg_big_"
+            "ab_neg_zeta_neg_x",#..
+            "ab_neg_zeta_neg_big_"
             ]
 titles = [  
-        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; 5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1, \;1.0, \;-5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; -5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (3., \;-1.0, \;-5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; 5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (0.1, \;1.0, \;-5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; -1.0,\; -5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (3., \;-1.0, \;-5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;1.0, \;5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
-        #   L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
+          L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
+          L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
 ]
-for i in eachindex(p)
-    get_trajectories(p[i], filenames[i], titles[i])
+function run_ode_trajs()
+    for i in eachindex(p)
+        get_trajectories(p[i], filenames[i], titles[i])
+    end
 end
-
 ## time dependencies
 function get_time_dependencies(p::Params, filename, title)
     init_vals = [
@@ -151,18 +152,14 @@ function get_time_dependencies(p::Params, filename, title)
     save("projekt_Duffing/graphics/time$filename.pdf", fig)
     return fig
 end
-
-for i in eachindex(p)
-    get_time_dependencies(p[i], filenames[i], titles[i])
+function run_time_ode()
+    for i in eachindex(p)
+        get_time_dependencies(p[i], filenames[i], titles[i])
+    end
 end
 
 ## 
 function sila_wymuszajaca(p::Params)
-"""ab_pos_zeta05_gamma02_omega1"""
-
-# init_vals = [L"(x_0,\;v_0)=(0.5, \;-2.0)", L"(x_0,\;v_0)=(-1., \;2.0)",
-#      L"(x_0,\;v_0)=(-1.0, \;0.5)", L"(x_0,\;v_0)=(0.5, \;-1.7)",
-#      L"(x_0,\;v_0)=(0.0, \;0.1)", L"(x_0,\;v_0)=(0.0, \;-0.5)"]
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
         L"(x_0,\;v_0)=(-1., \;2.0)",
@@ -215,10 +212,10 @@ function sila_wymuszajaca(p::Params)
     # save("projekt_Duffing/graphics/sila_wymuszajaca_gamma02.pdf", fig)
     return fig
 end
-# p = Params(0.05, -1.0, 0.25, 2.5, 2.0)
-p = Params(0.05, 1.0, 5.0, 0.2, 1.0)
-sila_wymuszajaca(p)
-
+function run_example_force_trajs()
+    p = Params(0.05, 1.0, 5.0, 0.2, 1.0)
+    sila_wymuszajaca(p)
+end
 
 ## time dependencies
 function sila_wymuszajaca_time(p::Params)
@@ -263,11 +260,13 @@ function sila_wymuszajaca_time(p::Params)
     end
 
     Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
-    # display(fig)
-    save("projekt_Duffing/graphics/time-gamma022.pdf", fig)
+    display(fig)
+    # save("projekt_Duffing/graphics/time-gamma022.pdf", fig)
     return fig
 end
-sila_wymuszajaca_time(p)
+function run_example_time_force()
+    sila_wymuszajaca_time(p)
+end
 
 
 ## poincare
@@ -282,11 +281,11 @@ function plot_poincare(filename::String)
     scatter!(ax, 
         x, v, markersize = 4
     )
-    # display(fig)
-    save("projekt_Duffing/graphics/poincare_chaos1.pdf", fig)
+    display(fig)
+    # save("projekt_Duffing/graphics/poincare_chaos1.pdf", fig)
     return fig
 end
-plot_poincare("projprojekt_Duffingekt/build/data/poincare1_poincare.txt")
+plot_poincare("projekt_Duffing/build/data/poincare1_poincare.txt")
 
 ## LAPUNOV
 function get_lapunow_exponen()
@@ -301,27 +300,14 @@ function get_lapunow_exponen()
         x, v
     )
     hlines!(ax, 0.0, 0.0, color = :gray, linestyle = :dash)
-    # display(fig)
-    save("projekt_Duffing/graphics/lapunow_gamma.pdf", fig)
+    display(fig)
+    # save("projekt_Duffing/graphics/lapunow_gamma.pdf", fig)
 end
-get_lapunow_exponen()
 ##
-using CairoMakie, DelimitedFiles, FilePathsBase
 
-function plot_bifur_or_poincare(out_prefix)
-    poincare_file = "projekt_Duffing/build/data/$(out_prefix)_bifur_poincare.txt"
+
+function plot_bifur(out_prefix)
     amp_file = "projekt_Duffing/build/data/bifurcation_gamma_scan_gamma.txt"
-
-    # # load poincare
-    # data_p = readdlm(poincare_file, '\t', comments=true)
-    # gammas_p = data_p[:,1]
-    # xs_p = data_p[:,3]
-
-    # fig = Figure(resolution=(1000,600))
-    # ax = Axis(fig[1,1], xlabel="gamma", ylabel="x (Poincare)",
-    #           title="Poincare map (stroboscopic samples)")
-    # scatter!(ax, gammas_p, xs_p, markersize=1.5, color=:black)
-    # display(fig)
 
     data_a = readdlm(amp_file, '\t', comments=true)
     gam = data_a[:,1]
@@ -332,17 +318,16 @@ function plot_bifur_or_poincare(out_prefix)
                title=L"Bifurkacja: amplituda do $\gamma$",
                xlabelsize = 30, ylabelsize = 30, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     scatter!(ax2, gam, amp, markersize=1, alpha=0.7)
-    # display(fig2)
-    save("projekt_Duffing/graphics/biffur_gamma.png", fig2)
+    display(fig2)
+    # save("projekt_Duffing/graphics/biffur_gamma.png", fig2)
 end
 
-plot_bifur("duffing")  
 
 ## energy analysis
 
 function run_energy_analysis()
     file = readdlm("projekt_Duffing/build/data/energy_energy.txt")
-    t = file[2:end, 1]
+    t = file[2:end, 2]
     e_kinetic = file[2:end, 4]
     e_potential = file[2:end, 5]
     e_input = file[2:end, 6]	
@@ -356,7 +341,6 @@ function run_energy_analysis()
     # lines!(ax2, t, e_input, alpha=0.7, label = L"\text{praca siły wymuszającej}")
     lines!(ax2, t, e_total, alpha=0.7, label = L"\text{całkowita}", linewidth = 3, color = :purple)
     Legend(fig2[2, 1], ax2, orientation = :horizontal, framevisible = false, labelsize = 27)
-    # display(fig2)
-    save("projekt_Duffing/graphics/energy_analysis.pdf", fig2)
+    display(fig2)
+    # save("projekt_Duffing/graphics/energy_analysis.pdf", fig2)
 end
-run_energy_analysis()
