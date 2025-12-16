@@ -133,14 +133,14 @@ void show_menu_and_execute() {
 void run_poincare_analysis() {
     std::cout << "\n======= POINCARÉ MAP ANALYSIS =======\n";
     
-    Duffing du(0.1, -1.0, 0.25, 2.5, 2.0); // zeta, alpha, beta, gamma, omega
-    
+    // Duffing du(0.1, -1.0, 0.25, 2.5, 2.0); // zeta, alpha, beta, gamma, omega
+    Duffing du(0.15, -1.0, 1.0, 0.36, 1.2);
     double T = 2.0 * M_PI / 2.0; 
     std::cout << "Period T = " << T << " seconds" << std::endl;
     
     std::cout << "Running Poincaré map analysis...\n";
     du.poincare_map(10*T,
-                    50000,
+                    500,
                     "poincare_analysis");
     
     std::cout << "Poincaré map analysis completed.\n";
@@ -156,7 +156,7 @@ void run_bifurcation_analysis() {
         "gamma",           // parametr do skanowania
         0.1,               // min
         0.5,               // max
-        5000,               // liczba kroków
+        5000,              // liczba kroków
         {0.0, 0.0},        // warunek początkowy
         200.0,             // czas transjentowy
         200,               // liczba okresów do zapisania
@@ -196,13 +196,13 @@ void run_quantum_analysis(){
     );
     
     qd.set_initial_gaussian(
-        -1.0,      // x0 
+        1.0,      // x0 
         0.0,       // p0 
         0.3        // sigma 
     );
     
     double dt = 0.005;                    // krok czasowy
     int n_steps = 500;                  // liczba kroków (t_max = 50)
-    qd.evolve(dt, n_steps, "duffing", 5);  // zapisuj co 5 kroków
+    qd.evolve(dt, n_steps, "duffing_gauss2", 1);  // zapisuj co 1 kroków
     
 }

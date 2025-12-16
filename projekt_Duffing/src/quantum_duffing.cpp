@@ -43,11 +43,12 @@ void QuantumDuffing::setup_grid() {
 }
 
 void QuantumDuffing::setup_fftw() {
-    fft_in = fftw_alloc_complex(p.N);
+
+    fft_in = fftw_alloc_complex(p.N);//malloc: dane w pamięci są obok siebie
     fft_out = fftw_alloc_complex(p.N);
-    
+
     plan_forward = fftw_plan_dft_1d(p.N, fft_in, fft_out, 
-                                     FFTW_FORWARD, FFTW_ESTIMATE);
+                                     FFTW_FORWARD, FFTW_ESTIMATE);// estimate: potestuj kilka transformat (forward -, backward +)
     plan_backward = fftw_plan_dft_1d(p.N, fft_in, fft_out, 
                                       FFTW_BACKWARD, FFTW_ESTIMATE);
 }

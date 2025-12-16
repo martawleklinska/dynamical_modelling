@@ -261,7 +261,8 @@ end
 ## =======================================================================
 # === POINCARE MAP WITH PARAMS ζ, α, β with γ≠0 ==========================
 ## =======================================================================
-function plot_poincare(filename::String)
+function plot_poincare()
+    filename = "projekt_Duffing/build/data/poincare_analysis_poincare.txt"
     data = readdlm(filename, comments=true)
     
     x = data[:, 2]
@@ -276,7 +277,7 @@ function plot_poincare(filename::String)
     # save("projekt_Duffing/graphics/poincare_chaos1.pdf", fig)
     return fig
 end
-
+plot_poincare()
 ## =======================================================================
 # === LAPUNOV EXPONENT ζ, α, β with respect to γ =========================
 ## =======================================================================
@@ -369,14 +370,14 @@ function run_tdse()
     fig = Figure(size = (1000, 500))
     title_obs = Observable("Ewolucja czasowa")
     ax1_color = :blue
-    ax = Axis(fig[1,1], xlabel = L"x", ylabel = L"|\psi(x,\; t)|^2", 
+    ax = Axis(fig[1,1], xlabel = L"x \; (\text{a.u.})", ylabel = L"|\psi(x,\; t)|^2", 
     xlabelsize = 30, ylabelsize = 30, 
     title = title_obs, xticklabelsize = 18, titlesize = 20,
     yticklabelsize = 18,
     leftspinecolor = ax1_color, 
     yticklabelcolor = ax1_color, ylabelcolor = ax1_color, ytickcolor = ax1_color)
     ax2_color = :red
-    ax2 = Axis(fig[1,1], ylabel = L"U(x,\; t) (a.u.)", ylabelsize = 30, titlesize = 20,
+    ax2 = Axis(fig[1,1], ylabel = L"U(x,\; t)\; \text{(a.u.)}", ylabelsize = 30, titlesize = 20,
     yticklabelsize = 18, yaxisposition = :right, rightspinecolor = ax2_color, 
     yticklabelcolor = ax2_color, ylabelcolor = ax2_color, ytickcolor = ax2_color)
     hidexdecorations!(ax2)
@@ -397,7 +398,7 @@ function run_tdse()
     
     # ============================================================
     data_dir = "projekt_Duffing/build/data/quantum"
-    begin_file = "duffing_step_"
+    begin_file = "duffing_gauss2_step_"
 
     files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
     
@@ -405,13 +406,13 @@ function run_tdse()
 
     println("Found $(length(files)) data files")
     
-    obs_file = joinpath(data_dir, "duffing_observables.txt")
+    obs_file = joinpath(data_dir, "duffing_gauss2_observables.txt")
     obs_data = readdlm(obs_file, '\t', skipstart=1)
     times = obs_data[:, 2]  
 
     
-    filename = "projekt_Duffing/graphics/tdse_evolution.gif"
-    record(fig, filename, 1:length(files), framerate = 10) do i
+    filename = "projekt_Duffing/graphics/tdse_evolution_gauss2.gif"
+    record(fig, filename, 1:length(files), framerate = 50) do i
         time = times[i]
         title_obs[] = "Ewolucja czasowa t=$(round(time, digits=3))"
         
@@ -426,4 +427,24 @@ function run_tdse()
     end
     
     println("Animation saved to $filename")
+end
+function get_expectation_values()
+    data = readdlm("projekt_Duffing/build/data/quantum/duffing_observables.txt", skipstart = 1)
+    t = data[:, 3]
+    x = data[:, 4]
+    p = data[:, 5]
+    E = data[:, 6]
+    fig = Figure(size = (1000, 500))
+    ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", xlabelsize = 30, ylabelsize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    ax2_color = :red
+    ax2 = Axis(fig[1,1], ylabel = L"\langle p \rangle\; \text{(a.u.)}", ylabelsize = 30, titlesize = 20,
+    yticklabelsize = 20, yaxisposition = :right, rightspinecolor = ax2_color, 
+    yticklabelcolor = ax2_color, ylabelcolor = ax2_color, ytickcolor = ax2_color)
+    hidexdecorations!(ax2)
+    # ylims!(ax2, 8, 10)
+    
+    lines!(ax, t, x, color = :blue, linewidth = 4)
+    lines!(ax2, t, p, color = :red, linewidth = 4)
+    display(fig)
+    # save("projekt_Duffing/graphics/QM_xp_exp_val.pdf", fig)
 end
