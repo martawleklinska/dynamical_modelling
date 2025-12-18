@@ -122,7 +122,7 @@ void QuantumDuffing::evolve(double dt, int n_steps,
     
     std::string fname_obs = "data/quantum/" + filename + "_observables.txt";
     std::ofstream ofs_obs(fname_obs);
-    ofs_obs << "# step\tt\t<x>\t<p>\t<E>\tnorm\n";  
+    ofs_obs << "step\tt\t<x>\t<p>\t<E>\tnorm\n";  
     
     double t = 0.0;
     

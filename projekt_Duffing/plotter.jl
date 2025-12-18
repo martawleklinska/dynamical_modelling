@@ -47,7 +47,7 @@ titles = [
 ## =======================================================================
 # === TRAJECTORIES FOR 9 GIVEN COMBINATIONS OF PARAMS ζ, α, β with γ=0 ===
 ## =======================================================================
-function get_trajectories(p::Params, filename, title)
+function get_trajectories(p::Params, filename, title, isdisplay)
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
         L"(x_0,\;v_0)=(-1., \;2.0)",
@@ -56,6 +56,7 @@ function get_trajectories(p::Params, filename, title)
         L"(x_0,\;v_0)=(0.5, \;-1.7)",
         L"(x_0,\;v_0)=(0.5, \;-2.0)", 
         ]
+    points = [[-1.0, 0.5], [-1.0, 2.0], [0.0, 0.2], [0.0, 0.5], [0.5, -1.7], [0.5, -2.0]]
     xs = range(-1.2, 1.2, length = 20)
     vs = range(-2., 2., length = 20)
 
@@ -70,6 +71,7 @@ function get_trajectories(p::Params, filename, title)
     ax = Axis(fig[1, 1], xlabel=L"x", ylabel=L"$v$", xlabelsize = 30, limits = ((-1.2, 1.2), (-2.2, 2.)),
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     arrows!(ax, xs, vs, X, V, arrowsize=6, lengthscale = 1.2, linecolor=:gray, linewidth=8, alpha = 0.6)
+    
     # ============================================================
     data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     begin_file = "duff_$filename"
@@ -88,6 +90,7 @@ function get_trajectories(p::Params, filename, title)
             x_vals = data[:, 2]  
             y_vals = data[:, 3]  
             lines!(ax, x_vals, y_vals, linewidth=4, label = label, alpha = 0.7, color = cm[i])
+            scatter!(ax, [points[i][1]], [points[i][2]], marker = :circle, markersize = 20, color = cm[i])
         else
             @warn "cos jest nie tak z $(file) "
         end
@@ -98,16 +101,19 @@ function get_trajectories(p::Params, filename, title)
         scatter!(ax, sqrt(-p.alpha/p.beta), 0.0, color = :blue, markersize = 20, marker = :star5)
         scatter!(ax, -sqrt(-p.alpha/p.beta), 0.0, color = :red, markersize = 20, marker = :star5)
     end
-    Legend(fig[1,2], ax, labelsize = 25)
-    display(fig)
-    # save("projekt_Duffing/graphics/$filename.pdf", fig)
+    Legend(fig[1,2], ax, labelsize = 25, framevisible = false)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/$filename.pdf", fig)
+    end
     return fig
 end
 
 ## ============================================================================
 # === TIME-DEPENDENCIES FOR 9 GIVEN COMBINATIONS OF PARAMS ζ, α, β with γ=0 ===
 ## =======================================================================
-function get_time_dependencies(p::Params, filename, title)
+function get_time_dependencies(p::Params, filename, title, isdisplay)
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
         L"(x_0,\;v_0)=(-1., \;2.0)",
@@ -148,14 +154,17 @@ function get_time_dependencies(p::Params, filename, title)
     end
 
     Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
-    display(fig)
-    # save("projekt_Duffing/graphics/time$filename.pdf", fig)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/time$filename.pdf", fig)
+    end
     return fig
 end
 ## =======================================================================
 # === TRAJECTORIES FOR 1 GIVEN COMBINATION OF PARAMS ζ, α, β with γ≠0 ===
 ## =======================================================================
-function sila_wymuszajaca(p::Params)
+function sila_wymuszajaca(p::Params, isdisplay)
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
         L"(x_0,\;v_0)=(-1., \;2.0)",
@@ -203,15 +212,18 @@ function sila_wymuszajaca(p::Params)
     end
 
     Legend(fig[1,2], ax, labelsize = 25)
-    display(fig)
-    # save("projekt_Duffing/graphics/sila_wymuszajaca_gamma02.pdf", fig)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/sila_wymuszajaca_gamma02.pdf", fig)
+    end
     return fig
 end
 
 ## ===========================================================================
 # === TIME-DEPENDENCIES FOR 1 GIVEN COMBINATION OF PARAMS ζ, α, β with γ≠0 ===
 ## ===========================================================================
-function sila_wymuszajaca_time(p::Params)
+function sila_wymuszajaca_time(p::Params, isdisplay)
     init_vals = [
         L"(x_0,\;v_0)=(-1.0, \;0.5)", 
         L"(x_0,\;v_0)=(-1., \;2.0)",
@@ -253,73 +265,95 @@ function sila_wymuszajaca_time(p::Params)
     end
     
     Legend(fig[2,1:2], ax, labelsize = 25, orientation = :horizontal, nbanks = 2, framevisible = false)
-    display(fig)
-    # save("projekt_Duffing/graphics/time-gamma022.pdf", fig)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/time-gamma022.pdf", fig)
+    end
     return fig
 end
 
 ## =======================================================================
 # === POINCARE MAP WITH PARAMS ζ, α, β with γ≠0 ==========================
 ## =======================================================================
-function plot_poincare()
+function plot_poincare(isdisplay)
     filename = "projekt_Duffing/build/data/poincare_analysis_poincare.txt"
-    data = readdlm(filename, comments=true)
-    
+    data = readdlm(filename)
     x = data[:, 2]
     v = data[:, 3]
     fig = Figure(size = (800, 500))
-    ax = Axis(fig[1, 1], xlabel=L"x", ylabel=L"$v$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-1.2, 1.2)),
-    ylabelsize = 30, title=L"\zeta=0.1, \; \alpha=-1.0, \; \beta=0.25, \; \omega=2.0, \;\gamma=2.5", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
-    scatter!(ax, 
-    x, v, markersize = 4
-    )
-    display(fig)
-    # save("projekt_Duffing/graphics/poincare_chaos1.pdf", fig)
+    ax = Axis(fig[1, 1], xlabel=L"x", ylabel=L"$v$", xlabelsize = 30,
+    ylabelsize = 30, title=L"\zeta=0.15, \; \alpha=-1.0, \; \beta=1.0, \; \gamma=0.36, \;\omega=1.2", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    scatter!(ax, x, v, markersize = 8)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/poincare_period1.pdf", fig)
+    end
     return fig
 end
-plot_poincare()
 ## =======================================================================
 # === LAPUNOV EXPONENT ζ, α, β with respect to γ =========================
 ## =======================================================================
-function get_lapunow_exponen()
+function get_lapunow_exponen(isdisplay)
     data = readdlm("projekt_Duffing/build/data/lyapunov_lyapunov_gamma.txt", comments=true)
     
     x = data[3:end, 1]
     v = data[3:end, 2]
     fig = Figure(size = (1000, 500))
-    ax = Axis(fig[1, 1], xlabel=L"\gamma", ylabel=L"$\lambda$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-1.2, 1.2)),
+    ax = Axis(fig[1, 1], xlabel=L"\gamma", ylabel=L"$\lambda$", xlabelsize = 30,
     ylabelsize = 30, title=L"\text{wykładnik Lapunowa}", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     lines!(ax, 
     x, v
     )
     hlines!(ax, 0.0, 0.0, color = :gray, linestyle = :dash)
-    display(fig)
-    # save("projekt_Duffing/graphics/lapunow_gamma.pdf", fig)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/lapunow_gamma.pdf", fig)
+    end
 end
 
 ## =======================================================================
 # === BIFURCATION DIAGRAM OF PARAMS ζ, α, β with RESPECT TO γ ===
 ## =======================================================================
-function plot_bifur()
+function plot_bifur(isdisplay)
     amp_file = "projekt_Duffing/build/data/bifurcation_gamma_scan_gamma.txt"
     
     data_a = readdlm(amp_file, '\t', comments=true)
     gam = data_a[:,1]
     amp = data_a[:,2]
     
-    fig2 = Figure(resolution=(1000,500))
+    fig2 = Figure(size=(1000,500))
     ax2 = Axis(fig2[1,1], xlabel=L"$\gamma$", ylabel=L"x",
     title=L"Bifurkacja: amplituda do $\gamma$",
     xlabelsize = 30, ylabelsize = 30, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     scatter!(ax2, gam, amp, markersize=1, alpha=0.7)
-    display(fig2)
-    # save("projekt_Duffing/graphics/biffur_gamma.png", fig2)
+    if isdisplay
+        display(fig2)
+    else 
+        save("projekt_Duffing/graphics/biffur_gamma.png", fig2)
+    end
+end
+## =======================================================================
+# ========================= POINCARE MAP GIF =============================
+## =======================================================================
+function poincare_gif()
+    data = readdlm("projekt_Duffing/build/data/bifurcation_gamma_scan_gamma.txt", skipstart = true)
+    γ = data[:, 1]
+    x = data[:, 2]
+    v = data[:, 3]
+    title_obs = Observable("Mapa Poincare")
+    fig = Figure(size = (1000, 500))
+    ax = Axis(fig[1,1], xlabel = L"x", ylabel = L"v", title = title_obs, xlabelsize = 30, ylabelsize = 30, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    scatter_fig = CairoMakie.scatter!(ax, x[begin:201], v[begin:201], markersize = 4)
+    record()
 end
 ## =======================================================================
 # === ENERGY ANALYSIS WITH RESPECT TO TIME AND X: ζ, α, β with γ≠0 =======
 ## =======================================================================
 
-function run_energy_analysis()
+function run_energy_analysis(isdisplay)
     file = readdlm("projekt_Duffing/build/data/energy_energy.txt")
     t = file[2:end, 2]
     x = file[2:end, 1]
@@ -345,25 +379,87 @@ function run_energy_analysis()
     lines!(ax1, x, e_total, alpha=0.7, label = L"\text{całkowita}", linewidth = 3, color = :purple)
     
     Legend(fig[3, 1], ax2, orientation = :horizontal, framevisible = false, labelsize = 27)
-    display(fig)
-    # save("projekt_Duffing/graphics/energy_analysis.pdf", fig2)
-end
-function run_ode_trajs()
-    for i in eachindex(p)
-        get_trajectories(p[i], filenames[i], titles[i])
+    if isdisplay
+        display(fig2)
+    else 
+        save("projekt_Duffing/graphics/energy_analysis.pdf", fig2)
     end
 end
-function run_time_ode()
+function run_ode_trajs(display)
     for i in eachindex(p)
-        get_time_dependencies(p[i], filenames[i], titles[i])
+        get_trajectories(p[i], filenames[i], titles[i], display)
     end
 end
-function run_example_force_trajs()
+function run_time_ode(display)
+    for i in eachindex(p)
+        get_time_dependencies(p[i], filenames[i], titles[i], display)
+    end
+end
+function run_example_force_trajs(display)
     p = Params(0.05, 1.0, 5.0, 0.2, 1.0)
-    sila_wymuszajaca(p)
+    sila_wymuszajaca(p, display)
 end
-function run_example_time_force()
-    sila_wymuszajaca_time(p)
+function run_example_time_force(display)
+    sila_wymuszajaca_time(p, display)
+end
+
+## =======================================================================
+# === POINCARE MAP GIF WITH CHANGING GAMMA ============================
+## =======================================================================
+function poincare_gamma_gif()
+    filename = "projekt_Duffing/build/data/bifurcation_gamma_scan_gamma.txt"
+    data = readdlm(filename, '\t', Float64)  
+    
+    gamma_vals = data[:, 1]
+    x_vals = data[:, 2]
+    v_vals = data[:, 3]
+    
+    valid_indices = .!(isnan.(gamma_vals) .| isnan.(x_vals) .| isnan.(v_vals))
+    gamma_vals = gamma_vals[valid_indices]
+    x_vals = x_vals[valid_indices]
+    v_vals = v_vals[valid_indices]
+    
+    unique_gammas = unique(gamma_vals)
+    points_per_gamma = 1000  
+    n_gammas = length(unique_gammas)
+    
+    fig = Figure(size=(800, 600))
+    title_obs = Observable("Mapa Poincaré: γ = $(round(unique_gammas[1], digits=3))")
+    
+    ax = Axis(fig[1,1], 
+             xlabel = L"x", ylabel = L"v", 
+             title = title_obs,
+             xlabelsize = 30, ylabelsize = 30, titlesize = 25,
+             xticklabelsize = 20, yticklabelsize = 20,
+             limits = ((-1.2, 1.6), (-0.7, 1.2))
+            )  
+    
+    x_obs = Observable(Float64[])
+    v_obs = Observable(Float64[])
+    
+    scatter_plot = scatter!(ax, x_obs, v_obs, 
+                           markersize = 3, 
+                           color = :blue, 
+                           alpha = 0.7)
+
+    gif_filename = "projekt_Duffing/graphics/poincare_gamma_evolution.gif"
+    
+    record(fig, gif_filename, 1:n_gammas, framerate = 10) do i
+        start_idx = (i-1) * points_per_gamma +1
+        end_idx = i * points_per_gamma
+        
+        current_gamma = unique_gammas[i]
+        current_x = x_vals[start_idx:end_idx]
+        current_v = v_vals[start_idx:end_idx]
+        
+        title_obs[] = "Mapa Poincaré: γ = $(round(current_gamma, digits=3))"
+        
+        x_obs[] = current_x
+        v_obs[] = current_v
+        
+    end
+    
+    return fig
 end
 ## ============== QUANTUM ANALYSIS ======================
 function run_tdse()
@@ -428,12 +524,12 @@ function run_tdse()
     
     println("Animation saved to $filename")
 end
-function get_expectation_values()
-    data = readdlm("projekt_Duffing/build/data/quantum/duffing_observables.txt", skipstart = 1)
-    t = data[:, 3]
-    x = data[:, 4]
-    p = data[:, 5]
-    E = data[:, 6]
+function get_expectation_values(isdisplay::Bool)
+    data = readdlm("projekt_Duffing/build/data/quantum/duffing_gauss2_observables.txt", skipstart = 1)
+    t = data[:, 2]
+    x = data[:, 3]
+    p = data[:, 4]
+    E = data[:, 5]
     fig = Figure(size = (1000, 500))
     ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", xlabelsize = 30, ylabelsize = 30, xticklabelsize = 20, yticklabelsize = 20)
     ax2_color = :red
@@ -445,6 +541,10 @@ function get_expectation_values()
     
     lines!(ax, t, x, color = :blue, linewidth = 4)
     lines!(ax2, t, p, color = :red, linewidth = 4)
-    display(fig)
-    # save("projekt_Duffing/graphics/QM_xp_exp_val.pdf", fig)
+    # lines!(ax2, t, E, color = :purple, linewidth = 4)
+    if isdisplay
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/QM_xp_exp_val.pdf", fig)
+    end
 end

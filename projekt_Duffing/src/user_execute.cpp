@@ -154,12 +154,12 @@ void run_bifurcation_analysis() {
     std::cout << "Running bifurcation scan for gamma in [0.0, 1.0]...\n";
     du.bifurcation_analysis(
         "gamma",           // parametr do skanowania
-        0.1,               // min
+        0.25,               // min
         0.5,               // max
-        5000,              // liczba kroków
+        100,              // liczba kroków
         {0.0, 0.0},        // warunek początkowy
         200.0,             // czas transjentowy
-        200,               // liczba okresów do zapisania
+        1000,               // liczba okresów do zapisania
         "gamma_scan"       // nazwa pliku
     );
     
