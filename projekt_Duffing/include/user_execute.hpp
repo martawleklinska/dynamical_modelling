@@ -8,5 +8,6 @@ void run_lyapunov_analysis();
 void run_energy_analysis();
 void run_quantum_analysis();
 void show_menu_and_execute();
+void run_wigner_analysis();
 
 #endif

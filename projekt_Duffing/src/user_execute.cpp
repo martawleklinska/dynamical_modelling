@@ -1,4 +1,5 @@
 #include "duffing.hpp"
+#include "wigner.hpp"
 #include "user_execute.hpp"
 #include "quantum_duffing.hpp"
 #include <iostream>
@@ -86,9 +87,10 @@ void show_menu_and_execute() {
         std::cout << "4. Lyapunov exponent analysis\n";
         std::cout << "5. Energy analysis\n";
         std::cout << "6. Quantum Duffing analysis\n";
+        std::cout << "7. WDF analysis\n";
         std::cout << "0. Exit\n";
         std::cout << "===============================================\n";
-        std::cout << "Please enter your choice (0-6): ";
+        std::cout << "Please enter your choice (0-7): ";
         
         std::cin >> choice;
         
@@ -111,18 +113,21 @@ void show_menu_and_execute() {
             case 6:
                 run_quantum_analysis();
                 break;
+            case 7:
+                run_wigner_analysis();
+                break;
             case 0:
                 std::cout << "Exiting... Thank you for using Duffing Oscillator Solver!\n";
                 continue_running = false;
                 break;
             default:
-                std::cout << "Invalid choice! Please enter a number between 0 and 4.\n";
+                std::cout << "Invalid choice! Please enter a number between 0 and 7.\n";
                 std::cin.clear();
                 std::cin.ignore(10000, '\n');
                 break;
         }
         
-        if (continue_running && choice >= 1 && choice <= 6) {
+        if (continue_running && choice >= 1 && choice <= 7) {
             std::cout << "\nPress Enter to return to menu...";
             std::cin.ignore();
             std::cin.get();
@@ -204,5 +209,21 @@ void run_quantum_analysis(){
     double dt = 0.005;                    // krok czasowy
     int n_steps = 500;                  // liczba kroków (t_max = 50)
     qd.evolve(dt, n_steps, "duffing_gauss2", 1);  // zapisuj co 1 kroków
+    
+}
+
+void run_wigner_analysis() {
+    std::cout << "\n ======= WIGNER ANALYSIS =======\n";
+        
+    WignerDuffing wd(
+        -1.0, 1.0, 0.3, 1.0,  // alpha, beta, gamma, omega
+        1.0, 1.0,              // hbar, mass
+        -4.0, 4.0,             // x range
+        -4.0, 4.0,             // p range
+        128, 128               // Nx, Np
+    );
+    
+    wd.set_initial_gaussian(-1.0, 0.0, 0.3);
+    wd.evolve(0.01, 500, "duffing", 5);
     
 }

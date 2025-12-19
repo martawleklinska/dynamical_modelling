@@ -548,3 +548,43 @@ function get_expectation_values(isdisplay::Bool)
         save("projekt_Duffing/graphics/QM_xp_exp_val.pdf", fig)
     end
 end
+## ==================================================================
+# ============= WIGNER GIF ANALIZE ==================================
+## ==================================================================
+using Plots
+function get_wdf_gif()
+    data_dir = "projekt_Duffing/build/data/wigner"
+    begin_file = "duffing_step_"
+
+    files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
+    
+    sort!(files, by = f -> parse(Int, match(r"step_(\d+)", f).captures[1]))
+    
+    println("Found ", length(files), " files")
+    
+    data = readdlm(files[1], '\t', Float64, skipstart=1)
+    x_vals = data[:, 1]
+    p_vals = data[:, 2]
+    
+    x_unique = sort(unique(x_vals))
+    p_unique = sort(unique(p_vals))
+    n_x = length(x_unique)
+    n_p = length(p_unique)
+    
+    println("Grid dimensions: ", n_x, " x ", n_p)
+
+@gif for i in eachindex(files)
+    println("Processing frame ", i)
+    
+    data = readdlm(files[i], '\t', Float64, skipstart=1)
+    rho = data[:, 3]
+
+    rho_grid = reshape(rho, n_x, n_p)
+    
+    Plots.heatmap(x_unique, p_unique, rho_grid, 
+                  xlabel = "x", ylabel = "p", 
+                  title = "Wigner function t=$(i-1)",
+                  color = :viridis)
+end fps = 2
+end
+get_wdf_gif()
