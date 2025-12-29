@@ -15,12 +15,14 @@ class WignerDuffing {
 private:
     WignerParams p;
     
-    std::vector<double> x, p_vals;  
+    std::vector<double> x, p_vals;  // p_vals żeby nie było konfliktu z członkiem p
     std::vector<double> lambda, theta;
     double dx, dp;
     
+    // Funkcja Wignera W(x,p) - przechowujemy jako kompleksową!
     std::vector<std::vector<std::complex<double>>> W;
     
+    // FFTW
     fftw_complex *data_in, *data_out;
     fftw_plan plan_x_fwd, plan_x_bwd;
     fftw_plan plan_p_fwd, plan_p_bwd;
@@ -29,11 +31,14 @@ private:
     void setup_fftw();
     void cleanup_fftw();
     
+    // Operatory
     double U_operator(double x_val, double theta_val, double t) const;
     
+    // FFT helpers
     void fft_in_x_direction(bool forward);
     void fft_in_p_direction(bool forward);
     
+    // Split-operator steps
     void step_kinetic(double dt);
     void step_potential(double dt, double t);
     

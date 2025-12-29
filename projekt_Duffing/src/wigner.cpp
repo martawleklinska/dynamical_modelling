@@ -17,6 +17,7 @@ WignerDuffing::WignerDuffing(
     setup_grid();
     setup_fftw();
     
+    // Alokuj W jako kompleksową tablicę
     W.resize(p.Nx, std::vector<std::complex<double>>(p.Np, 0.0));
 }
 
@@ -101,6 +102,7 @@ void WignerDuffing::cleanup_fftw() {
 }
 
 void WignerDuffing::fft_in_x_direction(bool forward) {
+    // Kopiuj W → data_in (row-major: j*Nx + i)
     for (int j = 0; j < p.Np; ++j) {
         for (int i = 0; i < p.Nx; ++i) {
             int idx = j * p.Nx + i;
@@ -109,12 +111,14 @@ void WignerDuffing::fft_in_x_direction(bool forward) {
         }
     }
     
+    // Wykonaj FFT
     if (forward) {
         fftw_execute(plan_x_fwd);
     } else {
         fftw_execute(plan_x_bwd);
     }
     
+    // Kopiuj data_out → W
     double norm = forward ? 1.0 : 1.0 / p.Nx;
     for (int j = 0; j < p.Np; ++j) {
         for (int i = 0; i < p.Nx; ++i) {
@@ -315,7 +319,7 @@ void WignerDuffing::save_state(std::string filename, double t) {
         for (int j = 0; j < p.Np; ++j) {
             ofs << x[i] << "\t" << p_vals[j] << "\t" << W[i][j].real() << "\n";
         }
-        ofs << "\n";  
+        ofs << "\n";  // pusta linia dla gnuplot
     }
     
     ofs.close();
