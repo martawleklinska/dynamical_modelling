@@ -182,8 +182,8 @@ void run_lyapunov_analysis() {
 
 void run_energy_analysis(){
     std::cout << "\n======= ENERGY ANALYSIS =======\n";
-    Duffing duff(0.15, -1.0, 1.0, 2.5, 1.2);
-    duff.solve_with_energy("energy", {0.1, 0.0});
+    Duffing duff(0.1, -1.0, 5.0, 2.0, 2.0);
+    duff.solve_with_energy("energy", {0.1, 0.5});
 }
 
 void run_quantum_analysis(){

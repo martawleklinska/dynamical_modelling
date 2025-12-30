@@ -9,7 +9,7 @@ function run_all_tasks(;display::Bool = true)
     # poincare_gamma_gif()               # SAVE a Poincare map gif in γ=[0.25, 0.5]
     # get_lapunow_exponen(display)       # plot Lapunov exponent with respect to γ
     # plot_bifur(display)                # plot bifurcation diagram with respect to γ
-    # run_energy_analysis(display)       # plot energy with respect to x and t
+    run_energy_analysis(display)       # plot energy with respect to x and t
     # run_tdse()                         # SAVE gif of |ψ(x,t)|^2(x)
     # get_expectation_values(display)    # get <x>(t), <p>(t)
 end

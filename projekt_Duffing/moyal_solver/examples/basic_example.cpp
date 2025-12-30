@@ -10,19 +10,32 @@ int main() {
         
         // Configuration 
         MoyalConfig config;
+        // config.gridX = 1024;
+        // config.gridP = 512;
+        // config.ampX = 70.0;
+        // config.ampP = 1.0;
+        
+        // config.dt = 0.0001;
+        // config.timeSteps = 100;
+        // config.sigma_x = 3.0;
+        // config.sigma_p = 1.0 / (config.sigma_x * 2);
+        
+        // paper:
         config.gridX = 1024;
         config.gridP = 512;
-        config.ampX = 70.0;
-        config.ampP = 1.0;
-        config.dt = 0.0001;
-        
+        config.ampX = 8.0;
+        config.ampP = 6.0;
 
-        config.timeSteps = 100;
-        config.x_init = 0.0;
-        config.p_init = 0.15;
-        config.sigma_x = 3.0;
-        config.sigma_p = 1.0 / (config.sigma_x * 2);
+        config.dt = 0.001;
+        config.timeSteps = 100;   // ≈ 300 periods
         config.outputEvery = 1;
+        config.hbar = 1.;
+        config.x_init = -0.5;
+        config.p_init = 0.15;
+        config.sigma_x = 1.0;
+        config.sigma_p = 0.05;
+
+        // config.outputEvery = 1;
         
         std::cout << "=== Structured Moyal Equation Solver ===\n";
         std::cout << "Grid: " << config.gridX << " x " << config.gridP << "\n";

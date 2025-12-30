@@ -324,3 +324,103 @@ void Duffing::solve_with_energy(std::string filename, std::array<double, 2> ic) 
     
     std::cout << "Energy analysis saved to: " << fname << "\n";
 }
+
+void Duffing::resonance_curve(
+    double omega_min,
+    double omega_max,
+    int n_steps,
+    std::array<double, 2> ic,
+    double t_transient,
+    int n_periods_measure,
+    std::string filename
+) {
+    std::filesystem::create_directories("data");
+    
+    std::string fname = "data/resonance_" + filename + ".txt";
+    std::ofstream ofs(fname);
+    ofs << "# omega\tamplitude_forward\tomega_back\tamplitude_backward\n";
+    
+    DuffingParams p_original = p;
+    
+    std::vector<double> omega_forward, amp_forward;
+    
+    for (int i = 0; i < n_steps; ++i) {
+        double omega_val = omega_min + i * (omega_max - omega_min) / (n_steps - 1);
+        p.omega = omega_val;
+        
+        gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+        double T = 2.0 * M_PI / p.omega;
+        double h = T / 100.0;
+        gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(
+            &sys, gsl_odeiv2_step_rk8pd, h, 1e-10, 1e-10);
+        
+        double y[2] = {ic[0], ic[1]};
+        double t = 0.0;
+        
+        gsl_odeiv2_driver_apply(d, &t, t_transient, y);
+        
+        double x_max = 0.0;
+        for (int period = 0; period < n_periods_measure; ++period) {
+            double t_next = t + T;
+            gsl_odeiv2_driver_apply(d, &t, t_next, y);
+            x_max = std::max(x_max, std::abs(y[0]));
+        }
+        
+        omega_forward.push_back(omega_val);
+        amp_forward.push_back(x_max);
+        
+        ic[0] = y[0];
+        ic[1] = y[1];
+        
+        gsl_odeiv2_driver_free(d);
+        
+        std::cout << "Forward: " << (i+1) << "/" << n_steps 
+                  << " ω=" << omega_val << " A=" << x_max << "\n";
+    }
+    
+    std::vector<double> omega_backward, amp_backward;
+    
+    for (int i = n_steps - 1; i >= 0; --i) {
+        double omega_val = omega_min + i * (omega_max - omega_min) / (n_steps - 1);
+        p.omega = omega_val;
+        
+        gsl_odeiv2_system sys = {func, nullptr, 2, &p};
+        double T = 2.0 * M_PI / p.omega;
+        double h = T / 100.0;
+        gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(
+            &sys, gsl_odeiv2_step_rk8pd, h, 1e-10, 1e-10);
+        
+        double y[2] = {ic[0], ic[1]};
+        double t = 0.0;
+        
+        gsl_odeiv2_driver_apply(d, &t, t_transient / 5.0, y);
+        
+        double x_max = 0.0;
+        for (int period = 0; period < n_periods_measure; ++period) {
+            double t_next = t + T;
+            gsl_odeiv2_driver_apply(d, &t, t_next, y);
+            x_max = std::max(x_max, std::abs(y[0]));
+        }
+        
+        omega_backward.push_back(omega_val);
+        amp_backward.push_back(x_max);
+        
+        ic[0] = y[0];
+        ic[1] = y[1];
+        
+        gsl_odeiv2_driver_free(d);
+        
+        std::cout << "Backward: " << (n_steps - i) << "/" << n_steps 
+                  << " ω=" << omega_val << " A=" << x_max << "\n";
+    }
+    
+    for (size_t i = 0; i < omega_forward.size(); ++i) {
+        ofs << omega_forward[i] << "\t" << amp_forward[i] << "\t"
+            << omega_backward[i] << "\t" << amp_backward[i] << "\n";
+    }
+    
+    ofs.close();
+    p = p_original;
+    
+    std::cout << "Resonance curve saved to: " << fname << "\n";
+}

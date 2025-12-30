@@ -62,6 +62,15 @@ public:
         std::array<double, 2> ic = {0.0, 0.0}
     );
 
+    void resonance_curve(
+        double omega_min,
+        double omega_max,
+        int n_steps,
+        std::array<double, 2> ic,
+        double t_transient = 200.0,
+        int n_periods_measure = 50,
+        std::string filename = "resonance"
+    );
 };
 
 struct DuffingParamsWithEnergy {
