@@ -36,7 +36,7 @@ target_link_libraries(moyal_solver ${FFTW_LIBRARIES})
 target_compile_options(moyal_solver PRIVATE ${FFTW_CFLAGS_OTHER})
 
 # Example executable
-add_executable(basic_example examples/basic_example.cpp)
+add_executable(basic_example examples/main.cpp)
 target_link_libraries(basic_example moyal_solver)
 
 # Installation
