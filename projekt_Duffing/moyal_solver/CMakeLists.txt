@@ -36,11 +36,11 @@ target_link_libraries(moyal_solver ${FFTW_LIBRARIES})
 target_compile_options(moyal_solver PRIVATE ${FFTW_CFLAGS_OTHER})
 
 # Example executable
-add_executable(basic_example examples/main.cpp)
-target_link_libraries(basic_example moyal_solver)
+add_executable(main examples/main.cpp)
+target_link_libraries(main moyal_solver)
 
 # Installation
-install(TARGETS moyal_solver basic_example
+install(TARGETS moyal_solver main
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin)
 

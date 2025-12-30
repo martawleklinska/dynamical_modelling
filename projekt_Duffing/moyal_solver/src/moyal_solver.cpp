@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
+#include <sstream>
 
 MoyalSolver::MoyalSolver(const MoyalConfig& config, std::unique_ptr<Potential> potential)
     : config_(config), phase_space_(config), wigner_(phase_space_),
@@ -12,7 +14,7 @@ MoyalSolver::MoyalSolver(const MoyalConfig& config, std::unique_ptr<Potential> p
                                                            std::move(potential), 
                                                            config_.hbar);
 }
-
+// move semantics
 void MoyalSolver::setInitialCondition(const std::function<Complex(double, double)>& init_func) {
     wigner_.initializeFromFunction(init_func);
 }
@@ -131,22 +133,51 @@ void MoyalSolver::saveState(const std::string& filename) const {
 void MoyalSolver::outputData() {
     // Save current Wigner distribution
     std::ostringstream filename;
-    filename << config_.outputDir << "wigner_" << std::setw(6) << std::setfill('0') 
+    filename << config_.outputDir << "wigner_" << std::setw(11) << std::setfill('0') 
              << current_step_ << ".dat";
     
     saveState(filename.str());
     
-    // Calculate and save expectation values
+    // Calculate and save expectation values and nonclassicality parameter
     double mean_x, mean_p, sigma_x, sigma_p;
     computeExpectationValues(mean_x, mean_p, sigma_x, sigma_p);
+    double delta = calculateNonclassicalityParameter();
     
     std::ofstream stats_file(config_.outputDir + "stats.dat", std::ios::app);
     if (current_step_ == 0) {
-        stats_file << "# Step Time Mean_X Mean_P Sigma_X Sigma_P Norm\n";
+        stats_file << "# Step Time Mean_X Mean_P Sigma_X Sigma_P Norm Delta\n";
     }
     
     stats_file << current_step_ << " " << current_time_ << " "
                << mean_x << " " << mean_p << " " 
                << sigma_x << " " << sigma_p << " "
-               << wigner_.totalProbability() << "\n";
+               << wigner_.totalProbability() << " " 
+               << delta << "\n";
+}
+
+double MoyalSolver::calculateNonclassicalityParameter() const {
+    const auto& wigner_data = wigner_.data();
+    const int nx = phase_space_.gridX();
+    const int np = phase_space_.gridP();
+    const double dx = phase_space_.dx();
+    const double dp = phase_space_.dp();
+    
+    double integral = 0.0;
+    
+    // Numerical integration using trapezoidal rule
+    for (int i = 0; i < nx; ++i) {
+        for (int j = 0; j < np; ++j) {
+            // Calculate |W(x_i, p_j)|
+            double wigner_abs = std::abs(wigner_data[i][j]);
+            
+            // Integration weights for trapezoidal rule
+            double weight_x = (i == 0 || i == nx - 1) ? 0.5 : 1.0;
+            double weight_p = (j == 0 || j == np - 1) ? 0.5 : 1.0;
+            
+            integral += weight_x * weight_p * wigner_abs * dx * dp;
+        }
+    }
+    
+    // δ(t) = ∫∫ |W(x,p,t)| dx dp - 1
+    return integral - 1.0;
 }

@@ -36,6 +36,7 @@
          */
         void evolve(int steps = -1); // -1 means config_.timeSteps
         void evolveOneStep();
+        // fft_p not with booleans
 
         //access
         const WDF& getWigner() const { return wigner_ ;}
@@ -46,6 +47,12 @@
         //analysis
         void computeExpectationValues(double& mean_x, double& mean_p,
                                         double& sigma_x, double& sigma_p) const;
+        
+        /**
+         * @brief Calculate nonclassicality parameter δ(t)
+         * @return \delta(t) = \int |\varrho(x,p,t)| dx dp - 1
+         */
+        double calculateNonclassicalityParameter() const;
 
         // saving
         void saveState(const std::string& filename) const;

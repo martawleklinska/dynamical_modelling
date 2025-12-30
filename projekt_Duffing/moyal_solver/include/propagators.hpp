@@ -4,6 +4,7 @@
 
 /**
  * @brief Base class for evolution propagators in Strang split-step method
+ * Abstract class 
  */
 class Propagator {
     protected:

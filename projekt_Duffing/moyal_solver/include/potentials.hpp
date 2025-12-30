@@ -26,23 +26,22 @@ class GaussianPotential : public Potential {
 
 /**
  * @brief harmonic oscillator potential
+ * clone() in code
  */
 class HarmonicPotential : public Potential {
-    private:
-        double mass_;
-        double omega_;
-        double center_;
-
     public:
-        HarmonicPotential(double mass, double omega, double center = 0.0) 
-            : mass_(mass), omega_(omega), center_(center) {};
+    double mass_ = 1;
+    double omega_ = 1;
+    double center_ = 0.5;
+        // HarmonicPotential(double mass, double omega, double center = 0.0) 
+        //     : mass_(mass), omega_(omega), center_(center) {};
         double operator()(double x, double t = 0.0) const override {
             double dx = x - center_;
             return 0.5 * mass_ * omega_ * omega_ * dx * dx;
         }
 
         std::unique_ptr<Potential> clone() const override {
-            return std::make_unique<HarmonicPotential>(mass_, omega_, center_);
+            return std::make_unique<HarmonicPotential>();
         }
 };
 
@@ -64,9 +63,9 @@ class OGPotential : public Potential {
 class Duffing : public Potential {
 public:
     double alpha = -1e-2;
-    double beta  =  1e-4;
+    double beta  =  1e-3;
     double gamma =  0.5;
-    double omega =  1.0e-3;
+    double omega =  1.0e-1;
 
 
     double operator()(double x, double t = 0.0) const override {
@@ -80,7 +79,7 @@ public:
 class DuffingPaper : public Potential {
 public:
     double epsilon = 0.01;   // nonlinearity (paper: ε = 0.01)
-    double F       = 0.03;   // drive amplitude (0.015–0.06)
+    double F       = 0.06;   // drive amplitude (0.015–0.06)
     double omega   = 1.02;   // drive frequency (~1.016–1.02)
 
     double operator()(double x, double t = 0.0) const override {

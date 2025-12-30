@@ -9,15 +9,15 @@
  class PhaseSpace{
     private:
         MoyalConfig config_;
-        std::vector<double> x_vec_;      // position grid
-        std::vector<double> p_vec_;      // momentum grid
-        std::vector<double> kx_vec_;     // position frequencies
-        std::vector<double> kp_vec_;     // momentum frequencies
+        std::vector<double> x_vec_;      //!< position grid
+        std::vector<double> p_vec_;      //!< momentum grid
+        std::vector<double> kx_vec_;     //!< position frequencies
+        std::vector<double> kp_vec_;     //!< momentum frequencies
 
-        RealMatrix X_, P_;              // Meshgrids
-        RealMatrix KX_, KP_;            // Frequency meshgrids
+        RealMatrix X_, P_;              //!< Meshgrids
+        RealMatrix KX_, KP_;            //!< Frequency meshgrids
 
-        double dx_, dp_;                // grid spacing
+        double dx_, dp_;                //!< grid spacing
 
         //fftw plans
         fftw_plan fft_x_forward_, fft_x_backward_;
@@ -44,7 +44,7 @@
         int gridP() const {return config_.gridP;}
 
         /**
-         *  @brief  fft operations: copu data to work array, execute FFT normalize for backward and copy back
+         *  @brief  fft operations: copy data to work array, execute FFT normalize for backward and copy back
         */ 
         void fft_x(ComplexMatrix& data, bool forward = true);
         void fft_p(ComplexMatrix& data, bool forward = true);
@@ -55,7 +55,7 @@
         void fftshift_p(ComplexMatrix& data);
 
     private:
-        void initializeGrids();     // initialize: resize position, momentum and ffts grids
-        void setupFFT();            // allocate momory for each plan
-        void createMeshgrids();     // setup meshgrids - reside matrices X_, P_, KX_, KP_
+        void initializeGrids();     //!< initialize: resize position, momentum and ffts grids
+        void setupFFT();            //!< allocate momory for each plan
+        void createMeshgrids();     //!< setup meshgrids - reside matrices X_, P_, KX_, KP_
 };

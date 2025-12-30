@@ -14,8 +14,8 @@ dt = 0.001
 function create_wigner_animation()
     output_paths = [
         "build/output/",  
-        "output/",               
-        "../output/"             
+        "dynamical_modelling/projekt_Duffing/moyal_solver/build/output/",               
+        "projekt_Duffing/moyal_solver/build/output/"             
     ]
     
     output_dir = nothing
@@ -85,13 +85,13 @@ function create_wigner_animation()
         W = reshape(wigner_real, np, nx)'
         W = sign.(W) .* abs.(W).^(1/4)
         
-        p = heatmap(
+        p = Plots.heatmap(
             x_unique, p_unique, W',
             xlabel = "Położenie x",
             ylabel = "Pęd p",
             title  = @sprintf("Funkcja Wignera (t = %.1f)", time_val),
             c = :RdBu,
-            clims  = (w_min, w_max),
+            clims  = (-0.3, 0.3),
             size   = (800, 600),
             dpi    = 100,
             aspect_ratio = :auto,
@@ -126,18 +126,18 @@ function create_wigner_animation()
         W = sign.(W) .* abs.(W).^(1/4)
         time_val = step * 10.0
         
-        p = heatmap(x_unique, p_unique, W',
+        p = Plots.heatmap(x_unique, p_unique, W',
                    xlabel="Położenie x", 
                    ylabel="Pęd p",
                    title=@sprintf("Funkcja Wignera t = %.1f", time_val),
                    color=:RdBu,
-                   clims=(w_min, w_max),
+                   clims=(-0.3, 0.3),
                 #    xlims = (-20, 40),
                 #    ylims = (-0.7, 0.8),
                    size=(800, 600),
                    dpi=150)
         png_filename = @sprintf("wigner_snapshot_t%.0f.png", time_val)
-        savefig(p, png_filename)
+        # savefig(p, png_filename)
         println("✓ Saved $png_filename")
     end
     

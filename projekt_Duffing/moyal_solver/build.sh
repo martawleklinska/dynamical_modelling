@@ -18,7 +18,7 @@ make -j$(nproc)
 
 if [ $? -eq 0 ]; then
     echo "Build successful!"
-    echo "Executable: ./basic_example"
+    echo "Executable: ./main"
 else
     echo "Build failed!"
     exit 1
