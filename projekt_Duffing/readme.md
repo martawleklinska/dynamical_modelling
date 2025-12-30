@@ -1,79 +1,79 @@
 # Duffing Oscillator Project
 
-A modular C++ framework for simulating **classical and quantum dynamics of the Duffing oscillator**, with a focus on **quantum–classical transition studies** using the **Wigner function and Moyal equation**.
+A C++ project for simulating **classical and quantum dynamics of the Duffing oscillator**, including
+nonlinear dynamics analysis and **quantum phase-space evolution using the Wigner function and Moyal equation**.
+
+The project consists of **two independent executables**:
+1. A **classical Duffing solver** with an interactive analysis menu
+2. A **quantum Wigner/Moyal solver** for phase-space dynamics
 
 ---
 
-## Project Overview
+## Classical Duffing Solver
 
-This repository contains two main components:
+### Build and Run
 
-1. **Classical Duffing oscillator analysis**
-2. **Quantum phase-space dynamics via the Moyal equation**
+From the project root:
 
-The quantum solver evolves the Wigner distribution using a **Strang split-operator method** with FFT-based propagators.
-
----
-
-## Directory Structure
-
-### Classical Duffing Solver
-include/
-duffing.hpp
-quantum_duffing.hpp
-user_executable.hpp
-
-src/
-main.cpp
-duffing.cpp
-quantum_duffing.cpp
-
-### Quantum Duffing Solver
-moyal_solver/
-include/
-moyal_setup.hpp
-moyal_solver.hpp
-phase_space.hpp
-potentials.hpp
-propagators.hpp
-wigner_df.hpp
-
-src/
-moyal_solver.cpp
-phase_space.cpp
-propagators.cpp
-wigner_df.cpp
-
-examples/
-main.cpp
-
-## Core Classes
-
-- **`PhaseSpace`**  
-  Manages phase-space grids, FFT plans, and coordinate transforms.
-
-- **`WignerDistribution`**  
-  Stores and manipulates the Wigner function, including initialization and diagnostics.
-
-- **`Potential`**  
-  Abstract base class for defining arbitrary time-dependent potentials.
-
-- **`Propagator`**  
-  Base class for kinetic and potential propagators used in operator splitting.
-
-- **`MoyalSolver`**  
-  Implements time evolution of the Wigner function using **Strang splitting**.
-
-## Building
-
-### Requirements
-- C++17 compatible compiler
-- CMake ≥ 3.12
-- FFTW3
-
-### Build Instructions
 ```bash
+cd projekt_duffing/
 mkdir build
 cd build
 cmake ..
 make
+./main
+```
+This launches an interactive menu:
+```bash
+====== DUFFING OSCILLATOR SOLVER ======
+
+=========== DUFFING OSCILLATOR MENU ===========
+1. ODE solver (multiple parameter sets)
+2. Poincaré map analysis
+3. Bifurcation analysis
+4. Lyapunov exponent analysis
+5. Energy analysis
+6. Quantum Duffing analysis
+0. Exit
+===============================================
+Please enter your choice (0-6):
+```
+### Changing System Parameters
+
+All classical Duffing parameters (drive strength, damping, nonlinearity, frequency, etc.)
+are defined in:
+```bash
+src/user_executable.cpp
+```
+## Quantum Wigner / Moyal Solver
+
+This part of the project evolves the Wigner distribution function using the Moyal equation and a Strang split-operator method with FFTs.
+
+### Build and Run
+```bash
+cd projekt_duffing/moyal_solver/
+mkdir build
+cd build
+cmake ..
+make
+./main
+```
+It initializes a Gaussian (coherent) state in phase space;
+
+Evolves it under a chosen potential (e.g. Duffing, but you can chose another in main.cpp);
+
+Outputs Wigner function data files to build/output/;
+
+Visualization done in Julia (main.jl);
+
+Simulation parameters (grid size, time step, effective ħ, initial state) are set in the example/main.cpp.
+
+## Requirements
+
+C++17 compatible compiler
+
+CMake ≥ 3.12
+
+FFTW3 (required for quantum solver)
+
+GSL

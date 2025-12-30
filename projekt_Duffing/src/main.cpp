@@ -1,6 +1,4 @@
-#include "duffing.hpp"
 #include "user_execute.hpp"
-#include "wigner.hpp"
 #include <iostream>
 
 int main() {
