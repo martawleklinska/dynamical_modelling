@@ -43,15 +43,19 @@
         int gridX() const {return config_.gridX;}
         int gridP() const {return config_.gridP;}
 
-        // fft operations
+        /**
+         *  @brief  fft operations: copu data to work array, execute FFT normalize for backward and copy back
+        */ 
         void fft_x(ComplexMatrix& data, bool forward = true);
         void fft_p(ComplexMatrix& data, bool forward = true);
-
+        /**
+         * 
+         */
         void fftshift_x(ComplexMatrix& data);
         void fftshift_p(ComplexMatrix& data);
 
     private:
-        void initializeGrids();
-        void setupFFT();
-        void createMeshgrids();
+        void initializeGrids();     // initialize: resize position, momentum and ffts grids
+        void setupFFT();            // allocate momory for each plan
+        void createMeshgrids();     // setup meshgrids - reside matrices X_, P_, KX_, KP_
 };

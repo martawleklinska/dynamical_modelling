@@ -55,7 +55,6 @@ void MoyalSolver::evolveOneStep() {
 
 void MoyalSolver::strangSplittingStep() {
     // Strang splitting: exp(-i*dt/2*T) exp(-i*dt*V) exp(-i*dt/2*T)
-    
     auto& wigner_data = wigner_.data();
     
     // 1. Half kinetic step
@@ -91,7 +90,7 @@ void MoyalSolver::computeExpectationValues(double& mean_x, double& mean_p,
     mean_x = pos_result.first;
     mean_p = mom_result.first;
     
-    // Calculate uncertainties (simplified)
+    // Calculate uncertainties 
     const auto& X = phase_space_.X();
     const auto& P = phase_space_.P();
     const auto& wigner_data = wigner_.data();

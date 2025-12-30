@@ -61,23 +61,23 @@ class OGPotential : public Potential {
 /**
  * @brief Duffing potential
  */
-// class Duffing : public Potential {
-// public:
-//     double alpha = -1e-2;
-//     double beta  =  1e-4;
-//     double gamma =  0.5;
-//     double omega =  1.0e-3;
-
-
-//     double operator()(double x, double t = 0.0) const override {
-//         return 0.5*alpha*x*x + 0.25*beta*x*x*x*x - x*gamma * std::cos(omega*t);  
-//     }
-    
-//     std::unique_ptr<Potential> clone() const override {
-//         return std::make_unique<Duffing>();
-//     }
-// };
 class Duffing : public Potential {
+public:
+    double alpha = -1e-2;
+    double beta  =  1e-4;
+    double gamma =  0.5;
+    double omega =  1.0e-3;
+
+
+    double operator()(double x, double t = 0.0) const override {
+        return 0.5*alpha*x*x + 0.25*beta*x*x*x*x - x*gamma * std::cos(omega*t);  
+    }
+    
+    std::unique_ptr<Potential> clone() const override {
+        return std::make_unique<Duffing>();
+    }
+};
+class DuffingPaper : public Potential {
 public:
     double epsilon = 0.01;   // nonlinearity (paper: ε = 0.01)
     double F       = 0.03;   // drive amplitude (0.015–0.06)
@@ -89,7 +89,7 @@ public:
     }
 
     std::unique_ptr<Potential> clone() const override {
-        return std::make_unique<Duffing>();
+        return std::make_unique<DuffingPaper>();
     }
 };
 

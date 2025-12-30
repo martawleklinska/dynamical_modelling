@@ -18,31 +18,26 @@ PhaseSpace::~PhaseSpace() {
 }
 
 void PhaseSpace::initializeGrids() {
-    // Position grid: linspace(-ampX/2, ampX/2, gridX)
     x_vec_.resize(config_.gridX);
     dx_ = config_.ampX / config_.gridX;
     for (int i = 0; i < config_.gridX; ++i) {
         x_vec_[i] = -config_.ampX/2.0 + i * dx_;
     }
     
-    // Momentum grid
     p_vec_.resize(config_.gridP);
     dp_ = config_.ampP / config_.gridP;
     for (int i = 0; i < config_.gridP; ++i) {
         p_vec_[i] = -config_.ampP/2.0 + i * dp_;
     }
-    
-    // FFT frequency grids
+
     kx_vec_.resize(config_.gridX);
     kp_vec_.resize(config_.gridP);
     
-    // Position frequencies
     for (int i = 0; i < config_.gridX; ++i) {
         int n = (i < config_.gridX/2) ? i : i - config_.gridX;
         kx_vec_[i] = 2.0 * M_PI * n / (config_.gridX * dx_);
     }
     
-    // Momentum frequencies  
     for (int i = 0; i < config_.gridP; ++i) {
         int n = (i < config_.gridP/2) ? i : i - config_.gridP;
         kp_vec_[i] = 2.0 * M_PI * n / (config_.gridP * dp_);
@@ -85,25 +80,21 @@ void PhaseSpace::setupFFT() {
 
 void PhaseSpace::fft_x(ComplexMatrix& data, bool forward) {
     for (int j = 0; j < config_.gridP; ++j) {
-        // Copy data to work array
         for (int i = 0; i < config_.gridX; ++i) {
             work_x_[i][0] = data[i][j].real();
             work_x_[i][1] = data[i][j].imag();
         }
         
-        // Execute FFT
         if (forward) {
             fftw_execute(fft_x_forward_);
         } else {
             fftw_execute(fft_x_backward_);
-            // Normalize for backward transform
             for (int i = 0; i < config_.gridX; ++i) {
                 work_x_[i][0] /= config_.gridX;
                 work_x_[i][1] /= config_.gridX;
             }
         }
         
-        // Copy back
         for (int i = 0; i < config_.gridX; ++i) {
             data[i][j] = Complex(work_x_[i][0], work_x_[i][1]);
         }
@@ -112,25 +103,21 @@ void PhaseSpace::fft_x(ComplexMatrix& data, bool forward) {
 
 void PhaseSpace::fft_p(ComplexMatrix& data, bool forward) {
     for (int i = 0; i < config_.gridX; ++i) {
-        // Copy data to work array
         for (int j = 0; j < config_.gridP; ++j) {
             work_p_[j][0] = data[i][j].real();
             work_p_[j][1] = data[i][j].imag();
         }
         
-        // Execute FFT
         if (forward) {
             fftw_execute(fft_p_forward_);
         } else {
             fftw_execute(fft_p_backward_);
-            // Normalize for backward transform
             for (int j = 0; j < config_.gridP; ++j) {
                 work_p_[j][0] /= config_.gridP;
                 work_p_[j][1] /= config_.gridP;
             }
         }
         
-        // Copy back
         for (int j = 0; j < config_.gridP; ++j) {
             data[i][j] = Complex(work_p_[j][0], work_p_[j][1]);
         }

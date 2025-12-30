@@ -29,8 +29,8 @@ class Potential {
     double ampX = 1500.0; // position range
     double ampP = 0.5;    // momentum range
 
-    double hbar = 1.0;
-    double mass = 1.0;
+    double hbar = 1.0;    // hbar - may be reduced if semiclassical is studied
+    double mass = 1.0;    // electron mass
 
     // time params
     double dt = 10.;       // time step
@@ -42,7 +42,7 @@ class Potential {
     double p_init  = 0.15;
 
     double sigma_x = 100.0;
-    double sigma_p = 0.005;   // ≈ 1/(2*sigma_x)
+    double sigma_p = 0.005;   
 
 
     // output
