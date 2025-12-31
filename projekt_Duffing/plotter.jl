@@ -173,24 +173,25 @@ function sila_wymuszajaca(p::Params, isdisplay)
         L"(x_0,\;v_0)=(0.5, \;-1.7)",
         L"(x_0,\;v_0)=(0.5, \;-2.0)", 
         ]
-    xs = range(-2.2, 2.2, length = 20)
-    vs = range(-3., 3., length = 20)
+    points = [[-1.0, 0.5], [-1.0, 2.0], [0.0, 0.2], [0.0, 0.5], [0.5, -1.7], [0.5, -2.0]]
+    xs = range(-5.0, 5.0, length = 30)
+    vs = range(-5., 5., length = 30)
 
     X = [v for x in xs, v in vs]
     V = [-2.0 * p.zeta * v - p.alpha * x - p.beta * x^3 for x in xs, v in vs]
-    mag = sqrt.(X.^2 .+ V.^2) .* 15
+    mag = sqrt.(X.^2 .+ V.^2) .* 10
     X ./= mag
     V ./= mag
     
     # ============================================================
     fig = Figure(size = (1000, 500))
-    ax = Axis(fig[1, 1], xlabel=L"x", ylabel=L"$v$", xlabelsize = 30, limits = ((-2., 1.9), (-3., 2.8)),
-    ylabelsize = 30, title=L"\zeta=0.05, \; \alpha=1.0, \; \beta=5.0, \; \omega=1.0, \;\gamma=0.2", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
-    arrows!(ax, xs, vs, X, V, arrowsize=8, lengthscale = 1.5, linecolor=:gray, linewidth=8, alpha = 0.3)
+    ax = Axis(fig[1, 1], xlabel=L"x", ylabel=L"$v$", xlabelsize = 30, limits = ((-4., 4.1), (-5., 5.1)),
+    ylabelsize = 30, title=L"\zeta=0.05, \; \alpha=-1.0, \; \beta=5.0, \; \omega=2.0, \;\gamma=2.5", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    arrows!(ax, xs, vs, X, V, arrowsize=8, lengthscale = 2., linecolor=:gray, linewidth=8, alpha = 0.2)
     # ============================================================
     data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
     # begin_file = "duff_b_pos_aneg_zeta05_gamma25_omega2"
-    begin_file = "duff_ab_pos_zeta05_gamma02_omega10"
+    begin_file = "duff_b_pos_aneg_zeta05_gamma25_omega2"
 
     files = filter(f -> occursin(begin_file, f) && endswith(f, "00000.txt"), readdir(data_dir; join=true))
 
@@ -205,13 +206,14 @@ function sila_wymuszajaca(p::Params, isdisplay)
         if size(data, 2) >= 3
             x_vals = data[:, 2]  
             y_vals = data[:, 3]  
-            lines!(ax, x_vals, y_vals, linewidth=4, label = label, alpha = 0.7, color = cm[i])
+            lines!(ax, x_vals, y_vals, linewidth=3, label = label, alpha = 0.7, color = cm[i])
+            scatter!(ax, [points[i][1]], [points[i][2]], marker = :circle, markersize = 20, color = cm[i])
         else
             @warn "cos jest nie tak z $(file) "
         end
     end
 
-    Legend(fig[1,2], ax, labelsize = 25)
+    Legend(fig[1,2], ax, labelsize = 25, framevisible = false)
     if isdisplay
         display(fig)
     else 
@@ -235,14 +237,14 @@ function sila_wymuszajaca_time(p::Params, isdisplay)
     # ============================================================
     fig = Figure(size = (1000, 500))
     ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-1.2, 1.2)),
-    ylabelsize = 30, title=L"\zeta=0.05, \; \alpha=1.0, \; \beta=1.0, \; \omega=1.0, \;\gamma=0.2", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
+    ylabelsize = 30, title=L"\zeta=0.05, \; \alpha=-1.0, \; \beta=5.0, \; \omega=2.0, \;\gamma=2.5", titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30,# limits = ((-0.1, 10.2), (-2.5, 2.7)),
     ylabelsize = 30, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     # ============================================================
     data_dir = "/home/marta/Documents/studia/dynamical_modelling/projekt_Duffing/build/data/"
-    # begin_file = "b_pos_aneg_zeta05_gamma25_omega2"
-    begin_file = "ab_pos_zeta05_gamma02_omega10"
+    begin_file = "b_pos_aneg_zeta05_gamma25_omega2"
+    # begin_file = "ab_pos_zeta05_gamma02_omega10"
     
     files = filter(f -> occursin(begin_file, f) && endswith(f, ".txt"), readdir(data_dir; join=true))
     
@@ -401,10 +403,11 @@ function run_time_ode(display)
     end
 end
 function run_example_force_trajs(display)
-    p = Params(0.05, 1.0, 5.0, 0.2, 1.0)
+    p = Params(0.05, -1.0, 0.25, 2.5, 2.0)
     sila_wymuszajaca(p, display)
 end
 function run_example_time_force(display)
+    p = Params(0.05, -1.0, 0.25, 2.5, 2.0)
     sila_wymuszajaca_time(p, display)
 end
 
@@ -530,26 +533,30 @@ function run_tdse()
     println("Animation saved to $filename")
 end
 function get_expectation_values(isdisplay::Bool)
-    data = readdlm("projekt_Duffing/build/data/quantum/duffing_gauss2_observables.txt", skipstart = 1)
+    data = readdlm("projekt_Duffing/build/data/quantum/duffing_gauss1_observables.txt", skipstart = 1)
     t = data[:, 2]
     x = data[:, 3]
     p = data[:, 4]
     E = data[:, 5]
     fig = Figure(size = (1000, 500))
-    ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", xlabelsize = 30, ylabelsize = 30, xticklabelsize = 20, yticklabelsize = 20)
-    ax2_color = :red
-    ax2 = Axis(fig[1,1], ylabel = L"\langle p \rangle\; \text{(a.u.)}", ylabelsize = 30, titlesize = 20,
-    yticklabelsize = 20, yaxisposition = :right, rightspinecolor = ax2_color, 
+    ax1_color = :royalblue1
+    ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", 
+    xlabelsize = 40, ylabelsize = 40, xticklabelsize = 30, yticklabelsize = 30,
+    leftspinecolor = ax1_color, yaxisposition = :left, 
+    yticklabelcolor = ax1_color, ylabelcolor = ax1_color, ytickcolor = ax1_color)
+    ax2_color = :crimson
+    ax2 = Axis(fig[1,1], ylabel = L"\langle p \rangle\; \text{(a.u.)}", ylabelsize = 40, titlesize = 30,
+    yticklabelsize = 30, yaxisposition = :right, rightspinecolor = ax2_color, 
     yticklabelcolor = ax2_color, ylabelcolor = ax2_color, ytickcolor = ax2_color)
     hidexdecorations!(ax2)
     # ylims!(ax2, 8, 10)
     
-    lines!(ax, t, x, color = :blue, linewidth = 4)
-    lines!(ax2, t, p, color = :red, linewidth = 4)
+    lines!(ax, t, x, color = ax1_color, linewidth = 4)
+    lines!(ax2, t, p, color = ax2_color, linewidth = 4)
     # lines!(ax2, t, E, color = :purple, linewidth = 4)
     if isdisplay
         display(fig)
     else 
-        save("projekt_Duffing/graphics/QM_xp_exp_val.pdf", fig)
+        save("projekt_Duffing/graphics/QM_xp_exp_val2.pdf", fig)
     end
 end

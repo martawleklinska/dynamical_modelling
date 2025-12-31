@@ -201,8 +201,8 @@ void run_quantum_analysis(){
         0.3        // sigma 
     );
     
-    double dt = 0.005;                    // krok czasowy
-    int n_steps = 500;                  // liczba kroków (t_max = 50)
-    qd.evolve(dt, n_steps, "duffing_gauss2", 1);  // zapisuj co 1 kroków
+    double dt = 0.05;                    // time step
+    int n_steps = 500;                  // number of steps (t_max = 50)
+    qd.evolve(dt, n_steps, "duffing_gauss2", 1);  // save every _ steps
     
 }
