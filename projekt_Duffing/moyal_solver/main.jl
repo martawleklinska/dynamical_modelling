@@ -1,14 +1,12 @@
-using Plots, DelimitedFiles, Printf
+using CairoMakie, DelimitedFiles, Printf
 using StatsBase
-gr()  
 
-# duffing params
-alpha = -1e-2
-beta  =  1e-4
-gamma =  0.5
-omega =  1e-3
-m     =  1.0
-dt = 0.001
+# Duffing params
+alpha = -5e-1;
+beta  =  1e-3;
+gamma =  0.5;
+omega =  1.0e-1;
+dt = 0.1
 
 
 function create_wigner_animation()
@@ -22,15 +20,15 @@ function create_wigner_animation()
     for path in output_paths
         if isdir(path)
             output_dir = path
-            println("Found output directory at: $path")
+            println("✓ Found output directory at: $path")
             break
         end
     end
     
     if output_dir === nothing
-        error("Output directory not found! Make sure you're in the moyal_solver/ directory and have run the C++ program first.")
+        error("Output directory not found! Run the C++ program first.")
     end
-    
+
     wigner_files = filter(f -> startswith(f, "wigner_") && endswith(f, ".dat"), 
                          readdir(output_dir))
     sort!(wigner_files)
@@ -43,130 +41,245 @@ function create_wigner_animation()
     
     first_file = joinpath(output_dir, wigner_files[1])
     data = readdlm(first_file)
-    x_coords = data[:, 1]
-    p_coords = data[:, 2]
+    x_coords, p_coords = data[:, 1], data[:, 2]
     
     x_unique = sort(unique(x_coords))
     p_unique = sort(unique(p_coords))
-    nx = length(x_unique)
-    np = length(p_unique)
+    nx, np = length(x_unique), length(p_unique)
     
-    println("Grid size: $nx × $np")
-    println("x range: $(minimum(x_unique)) to $(maximum(x_unique))")
-    println("p range: $(minimum(p_unique)) to $(maximum(p_unique))")
-
-    w_min, w_max = 0.3, -0.1
-    for (i, filename) in enumerate(wigner_files)
-        if i % 10 == 1  # Check every 10th file 
-            data = readdlm(joinpath(output_dir, filename))
-            w_vals = data[:, 3]
-            w_min = min(w_min, minimum(w_vals))
-            w_max = max(w_max, maximum(w_vals))
-        end
+    println("=== Grid size: $nx × $np")
+    println("=== x range: $(round(minimum(x_unique), digits=2)) to $(round(maximum(x_unique), digits=2))")
+    println("=== p range: $(round(minimum(p_unique), digits=2)) to $(round(maximum(p_unique), digits=2))")
+    
+    println("Calculating Wigner function range...")
+    w_min, w_max = Inf, -Inf
+    sample_files = wigner_files[1:max(1, length(wigner_files)÷10):end]  
+    
+    for filename in sample_files
+        data = readdlm(joinpath(output_dir, filename))
+        w_vals = data[:, 3]
+        w_min = min(w_min, minimum(w_vals))
+        w_max = max(w_max, maximum(w_vals))
     end
-    println("Wigner function range: $w_min to $w_max")
-    
-    println("Creating animation...")
-    anim = Animation()
+    println("✓ Wigner range: $(round(w_min, digits=4)) to $(round(w_max, digits=4))")
     
     animation_files = wigner_files[1:4:end]
+    n_frames = length(animation_files)
+        
+    fig = Figure(size = (900, 700), fontsize = 16)
     
-    for (i, filename) in enumerate(animation_files)
+    time_obs = Observable("t = 0.0")
+    wigner_obs = Observable(zeros(nx, np))
+    
+    ax = Axis(fig[1, 1], 
+              xlabel = "Położenie x", 
+              ylabel = "Pęd p",
+              title = time_obs,
+              titlesize = 20,
+              xlabelsize = 18,
+              ylabelsize = 18)
+    
+    hm = heatmap!(ax, x_unique, p_unique, wigner_obs,
+                      colormap = :RdBu,
+                      colorrange = (w_min, w_max))
+
+    try
+        Colorbar(fig[1, 2], hm, label = L"\varrho(x,p,t)", labelsize = 16)
+    catch e
+        println("Warning: Could not create colorbar: $e")
+    end
+    
+    gif_filename = "projekt_Duffing/moyal_solver/graphics/tunneling/wigner_evolution.gif"
+    
+    record(fig, gif_filename, 1:n_frames; framerate = 8) do frame_idx
+        filename = animation_files[frame_idx]
         
-        step_str = match(r"wigner_(\d+)\.dat", filename).captures[1]
-        step = parse(Int, step_str)
-        time_val = step * 1.0  
-        time = step * dt
-        
-        data = readdlm(joinpath(output_dir, filename))
-        wigner_real = data[:, 3]
-        
-        W = reshape(wigner_real, np, nx)'
-        W = sign.(W) .* abs.(W).^(1/4)
-        
-        p = Plots.heatmap(
-            x_unique, p_unique, W',
-            xlabel = "Położenie x",
-            ylabel = "Pęd p",
-            title  = @sprintf("Funkcja Wignera (t = %.1f)", time_val),
-            c = :RdBu,
-            clims  = (w_min, w_max),
-                # xlims = (-4.5, 3),
-                # ylims = (-6, 6),
-            size   = (800, 600),
-            dpi    = 100,
-            aspect_ratio = :auto,
-            )
+        try
+            step_str = match(r"wigner_(\d+)\.dat", filename).captures[1]
+            step = parse(Int, step_str)
+            time_val = step * dt
             
-        frame(anim, p)
-        
-        if i % 5 == 0
-            println("frame $i/$(length(animation_files))")
+            data = readdlm(joinpath(output_dir, filename))
+            wigner_real = data[:, 3]
+            
+            W = reshape(wigner_real, np, nx)'
+            W_vis = sign.(W) .* abs.(W).^(1/3)  
+            
+            time_obs[] = @sprintf("Funkcja Wignera (t = %.3f)", time_val)
+            wigner_obs[] = W_vis
+            
+            if frame_idx % max(1, n_frames÷20) == 0
+                progress = round(100 * frame_idx / n_frames, digits=1)
+                println("Progress: $progress% (frame $frame_idx/$n_frames)")
+            end
+        catch e
+            println("Warning: Error processing frame $frame_idx ($filename): $e")
         end
     end
     
-    gif_filename = "projekt_Duffing/moyal_solver/graphics/wigner_evolution.gif"
-    println("Saving animation to $gif_filename...")
-    gif(anim, gif_filename, fps=5)
+    snapshot_files = wigner_files[1:max(1, length(wigner_files)÷10):end]  
     
-    println("Animation saved as $gif_filename")
-    
-    println("Creating key snapshots...")
-    animation_files = wigner_files[1:20:end]
-
-    for (i, filename) in enumerate(animation_files)
-        
+    for (i, filename) in enumerate(snapshot_files)
         step_str = match(r"wigner_(\d+)\.dat", filename).captures[1]
         step = parse(Int, step_str)
-        time_val = step * 1.0  
-        time = step * dt
+        time_val = step * dt
         
         data = readdlm(joinpath(output_dir, filename))
-        
         wigner_real = data[:, 3]
-        W = reshape(wigner_real, np, nx)'
-        W = sign.(W) .* abs.(W).^(1/4)
-        time_val = step * 10.0
         
-        p = Plots.heatmap(x_unique, p_unique, W',
-                   xlabel="Położenie x", 
-                   ylabel="Pęd p",
-                   title=@sprintf("Funkcja Wignera t = %.1f", time_val),
-                   color=:RdBu,
-                   clims=(w_min, w_max),
-                #    xlims = (-20, 40),
-                #    ylims = (-0.7, 0.8),
-                   size=(800, 600),
-                   dpi=150)
-        png_filename = @sprintf("projekt_Duffing/moyal_solver/graphics/wigner_snapshot_t%.0f.png", time_val)
-        savefig(p, png_filename)
-        println("✓ Saved $png_filename")
+        W = reshape(wigner_real, np, nx)'
+        W_vis = sign.(W) .* abs.(W).^(1/3)
+        
+        fig_snap = Figure(size = (1000, 800))
+        ax_snap = Axis(fig_snap[1, 1],
+                      xlabel = L"\text{Położenie } x",
+                      ylabel = L"\text{Pęd } p", 
+                      title = @sprintf("Funkcja Wignera (t = %.3f)", time_val),
+                      titlesize = 25,
+                      xlabelsize = 25,
+                      ylabelsize = 25)
+        
+        hm_snap = try
+            heatmap!(ax_snap, x_unique, p_unique, W_vis,
+                    colormap = :RdBu,
+                    colorrange = (w_min, w_max))
+        catch e
+            println("Warning: Using fallback colormap for snapshot $i: $e")
+            heatmap!(ax_snap, x_unique, p_unique, W_vis,
+                    colormap = :viridis,
+                    colorrange = (w_min, w_max))
+        end
+        
+        try
+            Colorbar(fig_snap[1, 2], hm_snap, label = L"\varrho(x,p,t)", labelsize = 18)
+        catch e
+            println("Warning: Could not create colorbar for snapshot $i: $e")
+        end
+        
+        png_filename = @sprintf("projekt_Duffing/moyal_solver/graphics/tunneling/wigner_snapshot_t%.3f.png", time_val)
+        save(png_filename, fig_snap, px_per_unit = 2)  
+
     end
     
-    println("\n Visualization complete!")
-    println("Files created:")
-    println("  - wigner_snapshot_t*.png (key snapshots)")
+    println("\nVisualization complete!")
+    return fig, gif_filename
 end
 
 create_wigner_animation()
 ##
-function hamiltonian() 
-    x_unique = range(-0, 30, 100)
-    p_unique = range(-0.5, 0.5, 100)
-    Vx = 0.5*alpha .* x_unique.^2 .+
-        0.25*beta  .* x_unique.^4 .-
-        gamma .* x_unique .* cos(omega * 0.0001)
-    H = @. (p_unique'^2)/(2m) + Vx
-    Emin = minimum(H)
-    Emax = 0.0001 
-    levels = range(Emin, Emax, length=50)  
-    p = contour(
-    x_unique, p_unique, H',
-    levels = levels,
-    linewidth = 1.0,
-    linecolor = :black,
-    alpha = 0.4
-    )
-return p
+
+function create_nonclassicality_plot()
+    stats_file = "projekt_Duffing/moyal_solver/build/output/stats.dat"
+    if !isfile(stats_file)
+        println("Stats file not found, skipping nonclassicality plot")
+        return nothing
+    end
+    
+    data = readdlm(stats_file)
+    t = data[:, 2]
+    delta = size(data, 2) >= 8 ? data[:, 8] : zeros(length(t))  
+    
+    fig = Figure(size = (1000, 600))
+    ax = Axis(fig[1, 1],
+              xlabel = "Czas t",
+              ylabel = "Parametr nieklasyczności δ(t)",
+              title = "Ewolucja nieklasyczności stanu kwantowego")
+    
+    lines!(ax, t, delta, linewidth = 3, color = :purple)
+    hlines!(ax, [0], color = :black, linestyle = :dash, alpha = 0.5)
+    
+    save("projekt_Duffing/moyal_solver/graphics/nonclassicality.png", fig)
+    println("Nonclassicality plot saved")
+    
+    return fig
 end
-hamiltonian()
+##
+using CairoMakie
+
+alpha = -5e-1
+beta  =  1e-2
+gamma =  0.5
+omega =  1.0e-1
+m = 1
+
+function plot_duffing_potential()
+    x_unique = range(-10, 12, 300)
+    p_unique = range(-5, 5, 200)
+    
+    t = 0.0  
+    Vx = @. 0.5*alpha * x_unique^2 + 
+            0.25*beta * x_unique^4 - 
+            gamma * x_unique * cos(omega * t)
+    
+    H = [(p^2)/(2m) + V for p in p_unique, V in Vx]
+    
+    x_min = sqrt(-alpha/beta)  
+    V_min = 0.5*alpha*x_min^2 + 0.25*beta*x_min^4
+    
+    println("Potential wells at x = ±$(round(x_min, digits=2))")
+    println("Potential minimum value: $(round(V_min, digits=4))")
+    
+    Emin = minimum(H)
+    Emax = V_min + 10.0  
+    levels = range(Emin, Emax, length=25)
+    
+    fig = Figure(size=(1000, 400))
+    
+    ax1 = Axis(fig[1,1], 
+               xlabel = L"x", 
+               ylabel = L"V(x)",
+               title = L"\text{Potencjał Duffinga}",
+               xlabelsize = 20,
+               ylabelsize = 20, titlesize = 18)
+    lines!(ax1, x_unique, Vx, linewidth=3, color=:blue)
+
+    ax2 = Axis(fig[1,2], 
+               xlabel = L"x", 
+               ylabel = L"p",
+               title = L"\text{Hamiltonian w przestrzeni fazowej}",
+               xlabelsize = 20,
+               ylabelsize = 20, titlesize = 18)
+    contour!(ax2, x_unique, p_unique, H', levels=levels, linewidth=1.5)
+    
+    scatter!(ax2, [x_min, -x_min], [0, 0], color=:red, markersize=12, label="Potential wells")
+    
+    scatter!(ax2, [-4.0], [3.15], color=:green, markersize=15, label="IC")
+    axislegend(ax2, position=:lb, framevisible = false)
+    
+
+    # display(fig)
+    save("projekt_Duffing/moyal_solver/graphics/hamiltonian_left.pdf", fig)
+    return fig
+end
+
+plot_duffing_potential()
+
+## exp values
+
+function get_exp_vals()
+    data = readdlm("projekt_Duffing/moyal_solver/build/output/stats.dat")
+    t = data[:, 2]
+    x = data[:, 3]
+    p = data[:, 4]
+
+    fig = Figure(size = (1000, 500))
+    ax1_color = :royalblue1
+    ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", 
+    xlabelsize = 40, ylabelsize = 40, xticklabelsize = 30, yticklabelsize = 30,
+    leftspinecolor = ax1_color, yaxisposition = :left, 
+    yticklabelcolor = ax1_color, ylabelcolor = ax1_color, ytickcolor = ax1_color)
+    ax2_color = :crimson
+    ax2 = Axis(fig[1,1], ylabel = L"\langle p \rangle\; \text{(a.u.)}", ylabelsize = 40, titlesize = 30,
+    yticklabelsize = 30, yaxisposition = :right, rightspinecolor = ax2_color, 
+    yticklabelcolor = ax2_color, ylabelcolor = ax2_color, ytickcolor = ax2_color)
+    hidexdecorations!(ax2)
+    # ylims!(ax2, 8, 10)
+    
+    lines!(ax, t, x, color = ax1_color, linewidth = 4)
+    lines!(ax2, t, p, color = ax2_color, linewidth = 4)
+    
+    display(fig)
+    # save("projekt_Duffing/moyal_solver/graphics/xp_exp_val.pdf", fig)
+end
+
+get_exp_vals()

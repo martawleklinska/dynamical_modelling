@@ -25,10 +25,10 @@ class Potential {
 
 struct MoyalConfig {
     // grid params
-    int gridX = 256;      
-    int gridP = 256;
-    double ampX = 8.0;   
-    double ampP = 35.0;
+    int gridX = 512;      
+    int gridP = 512;
+    double ampX = 30.0;   
+    double ampP = 20.0;
 
     double hbar = 1.0;
     double mass = 1.0;
@@ -38,10 +38,10 @@ struct MoyalConfig {
     int timeSteps = 200;
 
     // init conditions
-    double x_init  = -1.0;
-    double p_init  = 0.15;
+    double x_init  = -4.0;
+    double p_init  = 3.15;
 
-    double sigma_x = 0.5; 
+    double sigma_x = 3.5; 
     double sigma_p = 1.0;    // sigma_p = hbar/(2*sigma_x) = 1/(2*0.5) = 1.0
 
     // output

@@ -62,7 +62,7 @@ class OGPotential : public Potential {
  */
 class Duffing : public Potential {
 public:
-    double alpha = -1e-2;
+    double alpha = -5e-1;
     double beta  =  1e-3;
     double gamma =  0.5;
     double omega =  1.0e-1;
