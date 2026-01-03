@@ -1,6 +1,7 @@
 #include "wigner_df.hpp"
 #include <cmath>
 #include <fstream>
+#include<iostream>
 #include <stdexcept>
 
 WDF::WDF(const PhaseSpace& phase_space) 
@@ -79,16 +80,11 @@ double WDF::totalProbability() const {
     
     for (int i = 0; i < nx; ++i) {
         for (int j = 0; j < np; ++j) {
-            if (wigner_[i][j].real() > 0) {
-                sum += wigner_[i][j].real() * dx * dp;
-            } else {
-                sum -= wigner_[i][j].real() * dx * dp;
-            }
+            sum += wigner_[i][j].real() * dx * dp;  
         }
     }
     return sum;
 }
-
 std::pair<double, double> WDF::expectedPosition() const {
     const auto& X = phase_space_.X();
     int nx = phase_space_.gridX();
@@ -190,15 +186,20 @@ RealMatrix WDF::magnitude() const {
 }
 
 void WDF::normalize() {
-    double total_norm = norm();
-    if (total_norm > 0) {
+    double total_prob = totalProbability();  // <-- użyj totalProbability(), nie norm()!
+    
+    if (std::abs(total_prob) > 1e-15) {  // sprawdź czy nie zero
         int nx = phase_space_.gridX();
         int np = phase_space_.gridP();
         
         for (int i = 0; i < nx; ++i) {
             for (int j = 0; j < np; ++j) {
-                wigner_[i][j] /= total_norm;
+                wigner_[i][j] /= total_prob;
             }
         }
+        
+        std::cout << "Normalized: initial probability was " << total_prob << "\n";
+    } else {
+        std::cerr << "ERROR: Cannot normalize - total probability is zero!\n";
     }
 }

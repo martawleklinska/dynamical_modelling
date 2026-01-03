@@ -23,30 +23,28 @@ class Potential {
  * @brief config params for Moyal eqn solver
  */
 
- struct MoyalConfig {
+struct MoyalConfig {
     // grid params
-    int gridX = 1024;     //!< position grid points
-    int gridP = 512;      //!< momentum grid points
-    double ampX = 1500.0; //!< position range
-    double ampP = 0.5;    //!< momentum range
+    int gridX = 256;      
+    int gridP = 256;
+    double ampX = 8.0;   
+    double ampP = 35.0;
 
-    double hbar = 1.0;    //!< hbar - may be reduced if semiclassical is studied
-    double mass = 1.0;    //!< electron mass
+    double hbar = 1.0;
+    double mass = 1.0;
 
     // time params
-    double dt = 10.;       //!< time step
-    int timeSteps = 800;    //!< number of time steps
-
+    double dt = 0.1;
+    int timeSteps = 200;
 
     // init conditions
-    double x_init  = -700.0;
+    double x_init  = -1.0;
     double p_init  = 0.15;
 
-    double sigma_x = 100.0;
-    double sigma_p = 0.005;   
-
+    double sigma_x = 0.5; 
+    double sigma_p = 1.0;    // sigma_p = hbar/(2*sigma_x) = 1/(2*0.5) = 1.0
 
     // output
-    int outputEvery = 10; // output frequency
+    int outputEvery = 1;
     std::string outputDir = "./output/";
 };

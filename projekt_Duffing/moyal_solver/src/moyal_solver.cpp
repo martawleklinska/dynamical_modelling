@@ -56,32 +56,27 @@ void MoyalSolver::evolveOneStep() {
 }
 
 void MoyalSolver::strangSplittingStep() {
-    // Strang splitting: exp(-i*dt/2*T) exp(-i*dt*V) exp(-i*dt/2*T)
+    // Proper Moyal equation Strang splitting:
+    // exp(-iΔt/(2ℏ)T) exp(-iΔt/ℏ V) exp(-iΔt/(2ℏ)T)
+    // Where T acts in momentum space, V acts in position space
+    
     auto& wigner_data = wigner_.data();
     
-    // 1. Half kinetic step
-    phase_space_.fft_p(wigner_data, true);  // FFT in momentum direction
-    kinetic_prop_->apply(wigner_data, config_.dt);
-    phase_space_.fft_p(wigner_data, false); // IFFT
+    // 1. Half kinetic step: T(dt/2) in momentum space
+    phase_space_.fft_x(wigner_data, true);   // FFT x → λ (momentum space)
+    kinetic_prop_->apply(wigner_data, config_.dt / 2.0);  // Apply T(dt/2)
+    phase_space_.fft_x(wigner_data, false);  // IFFT λ → x
     
-    // 2. Full potential step
-    phase_space_.fft_x(wigner_data, true);  // FFT in position direction
-    potential_prop_->apply(wigner_data, config_.dt);
-    phase_space_.fft_x(wigner_data, false); // IFFT
+    // 2. Full potential step: V(dt) in position space  
+    phase_space_.fft_p(wigner_data, true);   // FFT p → θ (position space)
+    potential_prop_->apply(wigner_data, config_.dt);      // Apply V(dt)
+    phase_space_.fft_p(wigner_data, false);  // IFFT θ → p
     
-    // 3. Half kinetic step
-    phase_space_.fft_p(wigner_data, true);  // FFT in momentum direction
-    kinetic_prop_->apply(wigner_data, config_.dt);
-    phase_space_.fft_p(wigner_data, false); // IFFT
+    // 3. Half kinetic step: T(dt/2) in momentum space
+    phase_space_.fft_x(wigner_data, true);   // FFT x → λ (momentum space)
+    kinetic_prop_->apply(wigner_data, config_.dt / 2.0);  // Apply T(dt/2)
+    phase_space_.fft_x(wigner_data, false);  // IFFT λ → x
     
-    // Keep only real part for Wigner function
-    int nx = phase_space_.gridX();
-    int np = phase_space_.gridP();
-    for (int i = 0; i < nx; ++i) {
-        for (int j = 0; j < np; ++j) {
-            wigner_data[i][j] = Complex(wigner_data[i][j].real(), 0.0);
-        }
-    }
 }
 
 void MoyalSolver::computeExpectationValues(double& mean_x, double& mean_p, 
@@ -153,6 +148,7 @@ void MoyalSolver::outputData() {
                << sigma_x << " " << sigma_p << " "
                << wigner_.totalProbability() << " " 
                << delta << "\n";
+
 }
 
 double MoyalSolver::calculateNonclassicalityParameter() const {
@@ -178,6 +174,6 @@ double MoyalSolver::calculateNonclassicalityParameter() const {
         }
     }
     
-    // δ(t) = ∫∫ |W(x,p,t)| dx dp - 1
+    // \delta(t) = \iint |W(x,p,t)| dx dp - 1
     return integral - 1.0;
 }

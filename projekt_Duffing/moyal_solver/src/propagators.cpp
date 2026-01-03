@@ -6,16 +6,16 @@ KineticPropagator::KineticPropagator(const PhaseSpace& phase_space, double mass)
 }
 
 void KineticPropagator::computePropagator(double dt){
-    const auto& KX = phase_space_.KX();
-    const auto& P = phase_space_.P();
+    const auto& P = phase_space_.P();  
 
     int nx = phase_space_.gridX();
     int np = phase_space_.gridP();
 
     for (int i = 0; i < nx; i++){
         for (int j = 0; j < np; j++){
-            double kinetic_term = KX[i][j] * P[i][j] / mass_;
-            propagator_matrix_[i][j] = std::exp(Complex(0, -dt * kinetic_term / 2.0));
+            double p = P[i][j];
+            double kinetic_energy = p * p / (2.0 * mass_);
+            propagator_matrix_[i][j] = std::exp(Complex(0, -dt * kinetic_energy));
         }
     }
 }

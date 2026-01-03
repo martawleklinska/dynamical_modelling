@@ -54,11 +54,10 @@ function create_wigner_animation()
     println("Grid size: $nx × $np")
     println("x range: $(minimum(x_unique)) to $(maximum(x_unique))")
     println("p range: $(minimum(p_unique)) to $(maximum(p_unique))")
-    
-    println("Determining global color scale...")
+
     w_min, w_max = 0.3, -0.1
     for (i, filename) in enumerate(wigner_files)
-        if i % 10 == 1  # Check every 10th file for efficiency
+        if i % 10 == 1  # Check every 10th file 
             data = readdlm(joinpath(output_dir, filename))
             w_vals = data[:, 3]
             w_min = min(w_min, minimum(w_vals))
@@ -70,7 +69,7 @@ function create_wigner_animation()
     println("Creating animation...")
     anim = Animation()
     
-    animation_files = wigner_files[1:1:10]
+    animation_files = wigner_files[1:4:end]
     
     for (i, filename) in enumerate(animation_files)
         
@@ -91,7 +90,9 @@ function create_wigner_animation()
             ylabel = "Pęd p",
             title  = @sprintf("Funkcja Wignera (t = %.1f)", time_val),
             c = :RdBu,
-            clims  = (-0.3, 0.3),
+            clims  = (w_min, w_max),
+                # xlims = (-4.5, 3),
+                # ylims = (-6, 6),
             size   = (800, 600),
             dpi    = 100,
             aspect_ratio = :auto,
@@ -100,18 +101,19 @@ function create_wigner_animation()
         frame(anim, p)
         
         if i % 5 == 0
-            println("Processed frame $i/$(length(animation_files))")
+            println("frame $i/$(length(animation_files))")
         end
     end
     
-    gif_filename = "wigner_evolution.gif"
+    gif_filename = "projekt_Duffing/moyal_solver/graphics/wigner_evolution.gif"
     println("Saving animation to $gif_filename...")
     gif(anim, gif_filename, fps=5)
     
-    println("✓ Animation saved as $gif_filename")
+    println("Animation saved as $gif_filename")
     
     println("Creating key snapshots...")
-    key_steps = [0, 000001, 000002, 000003, 001000]
+    animation_files = wigner_files[1:20:end]
+
     for (i, filename) in enumerate(animation_files)
         
         step_str = match(r"wigner_(\d+)\.dat", filename).captures[1]
@@ -131,13 +133,13 @@ function create_wigner_animation()
                    ylabel="Pęd p",
                    title=@sprintf("Funkcja Wignera t = %.1f", time_val),
                    color=:RdBu,
-                   clims=(-0.3, 0.3),
+                   clims=(w_min, w_max),
                 #    xlims = (-20, 40),
                 #    ylims = (-0.7, 0.8),
                    size=(800, 600),
                    dpi=150)
-        png_filename = @sprintf("wigner_snapshot_t%.0f.png", time_val)
-        # savefig(p, png_filename)
+        png_filename = @sprintf("projekt_Duffing/moyal_solver/graphics/wigner_snapshot_t%.0f.png", time_val)
+        savefig(p, png_filename)
         println("✓ Saved $png_filename")
     end
     

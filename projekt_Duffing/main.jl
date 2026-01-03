@@ -11,7 +11,8 @@ function run_all_tasks(;display::Bool = true)
     # plot_bifur(display)                # plot bifurcation diagram with respect to γ
     # run_energy_analysis(display)       # plot energy with respect to x and t
     # run_tdse()                         # SAVE gif of |ψ(x,t)|^2(x)
-    get_expectation_values(display)    # get <x>(t), <p>(t)
+    # get_expectation_values(display)    # get <x>(t), <p>(t)
+    get_exp_energy(display)    # get <E>(t)
 end
 
 run_all_tasks(display = false)

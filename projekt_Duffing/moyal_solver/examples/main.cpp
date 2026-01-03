@@ -10,15 +10,6 @@ int main() {
         
         // Configuration 
         MoyalConfig config;
-        config.gridX = 1024;
-        config.gridP = 512;
-        config.ampX = 70.0;
-        config.ampP = 1.0;
-        
-        config.dt = 0.0001;
-        config.timeSteps = 100;
-        config.sigma_x = 3.0;
-        config.sigma_p = 1.0 / (config.sigma_x * 2);
         
         // paper:
         // config.gridX = 1024;

@@ -356,8 +356,9 @@ end
 ## =======================================================================
 
 function run_energy_analysis(isdisplay)
-    file = readdlm("projekt_Duffing/build/data/energy_energy.txt")
+    file2 = readdlm("projekt_Duffing/build/data/energy_energy.txt")
     file1 = readdlm("projekt_Duffing/build/data/energy_energy_.txt")
+    file = readdlm("projekt_Duffing/build/data/energy_energy_no_zeta.txt")
     fig = Figure(resolution=(1000,800))
     ax2 = Axis(fig[1,1], xlabel=L"$t$", ylabel=L"\text{energia}",
     title=L"\text{Energia w czasie}",
@@ -389,7 +390,7 @@ function run_energy_analysis(isdisplay)
     if isdisplay
         display(fig)
     else 
-        save("projekt_Duffing/graphics/energy_zeta01_gamma2.pdf", fig)
+        save("projekt_Duffing/graphics/energy_zeta0_gamma2.pdf", fig)
     end
 end
 function run_ode_trajs(display)
@@ -558,5 +559,30 @@ function get_expectation_values(isdisplay::Bool)
         display(fig)
     else 
         save("projekt_Duffing/graphics/QM_xp_exp_val2.pdf", fig)
+    end
+end
+
+# =========== energy =========
+function get_exp_energy(is_display::Bool)
+    data = readdlm("projekt_Duffing/build/data/quantum/duffing_gauss1_observables.txt", skipstart = 1)
+    data2 = readdlm("projekt_Duffing/build/data/quantum/duffing_gauss2_observables.txt", skipstart = 1)
+    t = data[:, 2]
+
+    E = data[:, 5]
+    E2 = data2[:, 5]
+    fig = Figure(size = (1000, 500))
+    ax1_color = :black
+    ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle E\rangle\; (\text{a.u.})", 
+    xlabelsize = 35, ylabelsize = 35, xticklabelsize = 25, yticklabelsize = 25,
+    leftspinecolor = ax1_color, yaxisposition = :left, 
+    yticklabelcolor = ax1_color, ylabelcolor = ax1_color, ytickcolor = ax1_color)
+    
+    lines!(ax, t, E, color = :maroon3, linewidth = 4, label = L"x_0=-1\;\mathrm{a.u.}")
+    lines!(ax, t, E2, color = :seagreen3, linewidth = 4, label = L"x_0=1\;\mathrm{a.u.}")
+    axislegend(ax, labelsize = 30, framevisible = false, position = :rb)
+    if is_display
+        display(fig)
+    else 
+        save("projekt_Duffing/graphics/QM_E_exp_val2.pdf", fig)
     end
 end
