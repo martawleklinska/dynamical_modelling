@@ -72,19 +72,19 @@ function create_wigner_animation()
     wigner_obs = Observable(zeros(nx, np))
     
     ax = Axis(fig[1, 1], 
-              xlabel = "Położenie x", 
-              ylabel = "Pęd p",
+              xlabel = L"\text{Położenie} x", 
+              ylabel = L"\text{Pęd} p",
               title = time_obs,
-              titlesize = 20,
-              xlabelsize = 18,
-              ylabelsize = 18)
+              titlesize = 25,
+              xlabelsize = 25,
+              ylabelsize = 25)
     
     hm = heatmap!(ax, x_unique, p_unique, wigner_obs,
                       colormap = :RdBu,
                       colorrange = (w_min, w_max))
 
     try
-        Colorbar(fig[1, 2], hm, label = L"\varrho(x,p,t)", labelsize = 16)
+        Colorbar(fig[1, 2], hm, label = L"\varrho(x,p,t)", labelsize = 25)
     catch e
         println("Warning: Could not create colorbar: $e")
     end
@@ -130,14 +130,14 @@ function create_wigner_animation()
         W = reshape(wigner_real, np, nx)'
         W_vis = sign.(W) .* abs.(W).^(1/3)
         
-        fig_snap = Figure(size = (1000, 800))
+        fig_snap = Figure(size = (1000, 600))
         ax_snap = Axis(fig_snap[1, 1],
                       xlabel = L"\text{Położenie } x",
                       ylabel = L"\text{Pęd } p", 
                       title = @sprintf("Funkcja Wignera (t = %.3f)", time_val),
-                      titlesize = 25,
-                      xlabelsize = 25,
-                      ylabelsize = 25)
+                      titlesize = 35,
+                      xlabelsize = 35,
+                      ylabelsize = 35)
         
         hm_snap = try
             heatmap!(ax_snap, x_unique, p_unique, W_vis,
@@ -151,7 +151,7 @@ function create_wigner_animation()
         end
         
         try
-            Colorbar(fig_snap[1, 2], hm_snap, label = L"\varrho(x,p,t)", labelsize = 18)
+            Colorbar(fig_snap[1, 2], hm_snap, label = L"\varrho(x,p,t)", labelsize = 35)
         catch e
             println("Warning: Could not create colorbar for snapshot $i: $e")
         end
@@ -181,18 +181,20 @@ function create_nonclassicality_plot()
     
     fig = Figure(size = (1000, 600))
     ax = Axis(fig[1, 1],
-              xlabel = "Czas t",
-              ylabel = "Parametr nieklasyczności δ(t)",
-              title = "Ewolucja nieklasyczności stanu kwantowego")
+              xlabel = L"\text{Czas } t",
+              ylabel = L"\text{Parametr nieklasyczności } \delta(t)",
+              title = L"\text{Ewolucja nieklasyczności stanu kwantowego}",
+              titlesize = 30,
+                      xlabelsize = 30,
+                      ylabelsize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     lines!(ax, t, delta, linewidth = 3, color = :purple)
     hlines!(ax, [0], color = :black, linestyle = :dash, alpha = 0.5)
-    
-    save("projekt_Duffing/moyal_solver/graphics/nonclassicality.png", fig)
-    println("Nonclassicality plot saved")
-    
+    display(fig)
+    # save("projekt_Duffing/moyal_solver/graphics/nonclassicality.png", fig)
     return fig
 end
+create_nonclassicality_plot()
 ##
 using CairoMakie
 
@@ -204,7 +206,7 @@ m = 1
 
 function plot_duffing_potential()
     x_unique = range(-10, 12, 300)
-    p_unique = range(-5, 5, 200)
+    p_unique = range(-5.5, 5.5, 200)
     
     t = 0.0  
     Vx = @. 0.5*alpha * x_unique^2 + 
@@ -215,9 +217,6 @@ function plot_duffing_potential()
     
     x_min = sqrt(-alpha/beta)  
     V_min = 0.5*alpha*x_min^2 + 0.25*beta*x_min^4
-    
-    println("Potential wells at x = ±$(round(x_min, digits=2))")
-    println("Potential minimum value: $(round(V_min, digits=4))")
     
     Emin = minimum(H)
     Emax = V_min + 10.0  
@@ -241,13 +240,13 @@ function plot_duffing_potential()
                ylabelsize = 20, titlesize = 18)
     contour!(ax2, x_unique, p_unique, H', levels=levels, linewidth=1.5)
     
-    scatter!(ax2, [x_min, -x_min], [0, 0], color=:red, markersize=12, label="Potential wells")
+    scatter!(ax2, [x_min, -x_min], [0, 0], color=:red, markersize=12, label="studnie potencjału")
     
-    scatter!(ax2, [-4.0], [3.15], color=:green, markersize=15, label="IC")
+    scatter!(ax2, [-4.0], [3.15], color=:green, markersize=15, label="warunek początkowy")
     axislegend(ax2, position=:lb, framevisible = false)
     
 
-    # display(fig)
+    display(fig)
     save("projekt_Duffing/moyal_solver/graphics/hamiltonian_left.pdf", fig)
     return fig
 end
@@ -278,8 +277,8 @@ function get_exp_vals()
     lines!(ax, t, x, color = ax1_color, linewidth = 4)
     lines!(ax2, t, p, color = ax2_color, linewidth = 4)
     
-    display(fig)
-    # save("projekt_Duffing/moyal_solver/graphics/xp_exp_val.pdf", fig)
+    # display(fig)
+    save("projekt_Duffing/moyal_solver/graphics/xp_exp_val.pdf", fig)
 end
 
 get_exp_vals()

@@ -52,10 +52,8 @@ This part of the project evolves the Wigner distribution function using the Moya
 ### Build and Run
 ```bash
 cd projekt_duffing/moyal_solver/
-mkdir build
-cd build
-cmake ..
-make
+./build.sh 
+cd build  
 ./main
 ```
 It initializes a Gaussian (coherent) state in phase space;

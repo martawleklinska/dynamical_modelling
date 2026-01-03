@@ -38,11 +38,11 @@ struct MoyalConfig {
     int timeSteps = 200;
 
     // init conditions
-    double x_init  = -4.0;
-    double p_init  = 3.15;
+    double x_init  = -1.7;
+    double p_init  = 4.15;
 
     double sigma_x = 3.5; 
-    double sigma_p = 1.0;    // sigma_p = hbar/(2*sigma_x) = 1/(2*0.5) = 1.0
+    double sigma_p = 1/7;    // sigma_p = hbar/(2*sigma_x) = 1/(2*3.5) = 1.0
 
     // output
     int outputEvery = 1;
