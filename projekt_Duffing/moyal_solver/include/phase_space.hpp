@@ -44,7 +44,7 @@
         int gridP() const {return config_.gridP;}
 
         /**
-         *  @brief  fft operations: copy data to work array, execute FFT normalize for backward and copy back
+         *  @brief fft operations: copy data to work array, execute FFT normalize for backward and copy back
         */ 
         void fft_x(ComplexMatrix& data, bool forward = true);
         void fft_p(ComplexMatrix& data, bool forward = true);

@@ -13,7 +13,8 @@ function create_wigner_animation()
     output_paths = [
         "build/output/",  
         "dynamical_modelling/projekt_Duffing/moyal_solver/build/output/",               
-        "projekt_Duffing/moyal_solver/build/output/"             
+        "projekt_Duffing/moyal_solver/build/output/", 
+        "moyal_solver/build/output/"             
     ]
     
     output_dir = nothing
@@ -89,7 +90,7 @@ function create_wigner_animation()
         println("Warning: Could not create colorbar: $e")
     end
     
-    gif_filename = "projekt_Duffing/moyal_solver/graphics/tunneling/wigner_evolution.gif"
+    gif_filename = "moyal_solver/graphics/tunneling/wigner_evolution.gif"
     
     record(fig, gif_filename, 1:n_frames; framerate = 8) do frame_idx
         filename = animation_files[frame_idx]
@@ -156,7 +157,7 @@ function create_wigner_animation()
             println("Warning: Could not create colorbar for snapshot $i: $e")
         end
         
-        png_filename = @sprintf("projekt_Duffing/moyal_solver/graphics/tunneling/wigner_snapshot_t%.3f.png", time_val)
+        png_filename = @sprintf("moyal_solver/graphics/tunneling/wigner_snapshot_t%.3f.png", time_val)
         save(png_filename, fig_snap, px_per_unit = 2)  
 
     end
@@ -169,13 +170,13 @@ create_wigner_animation()
 ##
 
 function create_nonclassicality_plot()
-    stats_file = "projekt_Duffing/moyal_solver/build/output/stats.dat"
+    stats_file = "moyal_solver/build/output/stats.dat"
     if !isfile(stats_file)
         println("Stats file not found, skipping nonclassicality plot")
         return nothing
     end
     
-    data = readdlm(stats_file)
+    data = readdlm(stats_file, skipstart = 1)
     t = data[:, 2]
     delta = size(data, 2) >= 8 ? data[:, 8] : zeros(length(t))  
     
@@ -190,13 +191,12 @@ function create_nonclassicality_plot()
     
     lines!(ax, t, delta, linewidth = 3, color = :purple)
     hlines!(ax, [0], color = :black, linestyle = :dash, alpha = 0.5)
-    display(fig)
-    # save("projekt_Duffing/moyal_solver/graphics/nonclassicality.png", fig)
+    # display(fig)
+    save("moyal_solver/graphics/nonclassicality.png", fig)
     return fig
 end
 create_nonclassicality_plot()
 ##
-using CairoMakie
 
 alpha = -5e-1
 beta  =  1e-2
@@ -242,12 +242,12 @@ function plot_duffing_potential()
     
     scatter!(ax2, [x_min, -x_min], [0, 0], color=:red, markersize=12, label="studnie potencjału")
     
-    scatter!(ax2, [-4.0], [3.15], color=:green, markersize=15, label="warunek początkowy")
+    scatter!(ax2, [-4.0], [2.15], color=:green, markersize=15, label="warunek początkowy")
     axislegend(ax2, position=:lb, framevisible = false)
     
 
-    display(fig)
-    save("projekt_Duffing/moyal_solver/graphics/hamiltonian_left.pdf", fig)
+    # display(fig)
+    save("moyal_solver/graphics/hamiltonian_left.pdf", fig)
     return fig
 end
 
@@ -256,11 +256,11 @@ plot_duffing_potential()
 ## exp values
 
 function get_exp_vals()
-    data = readdlm("projekt_Duffing/moyal_solver/build/output/stats.dat")
+    data = readdlm("moyal_solver/build/output/stats.dat", skipstart = 1)
     t = data[:, 2]
     x = data[:, 3]
     p = data[:, 4]
-
+    
     fig = Figure(size = (1000, 500))
     ax1_color = :royalblue1
     ax = Axis(fig[1,1], xlabel = L"t\; (\text{a.u.})", ylabel = L"\langle x\rangle\; (\text{a.u.})", 
@@ -278,7 +278,57 @@ function get_exp_vals()
     lines!(ax2, t, p, color = ax2_color, linewidth = 4)
     
     # display(fig)
-    save("projekt_Duffing/moyal_solver/graphics/xp_exp_val.pdf", fig)
+    save("moyal_solver/graphics/xp_exp_val.pdf", fig)
 end
 
 get_exp_vals()
+## create trajectory of xp values
+function get_traj_of_exp_vals()
+    alpha = -5e-1
+    beta  =  1e-2
+    gamma =  0.5
+    omega =  1.0e-1
+    m = 1
+    x_unique = range(-10, 12, 300)
+    p_unique = range(-5.5, 5.5, 200)
+    
+    t = 0.0  
+    Vx = @. 0.5*alpha * x_unique^2 + 
+            0.25*beta * x_unique^4 - 
+            gamma * x_unique * cos(omega * t)
+    
+    H = [(p^2)/(2m) + V for p in p_unique, V in Vx]
+
+    data = readdlm("moyal_solver/build/output/stats.dat", skipstart = 1)
+    t = data[:, 2]
+    x = data[:, 3]
+    p = data[:, 4]
+
+    x_min = sqrt(-alpha/beta)  
+    V_min = 0.5*alpha*x_min^2 + 0.25*beta*x_min^4
+    
+    Emin = minimum(H)
+    Emax = V_min + 10.0  
+    levels = range(Emin, Emax, length=25)
+    
+    fig = Figure(size=(1000, 400))
+    
+    ax2 = Axis(fig[1,1], 
+               xlabel = L"x", 
+               ylabel = L"p",
+               title = L"\text{Hamiltonian w przestrzeni fazowej}",
+               xlabelsize = 30,
+               ylabelsize = 30, titlesize = 28,
+               xticklabelsize = 20, yticklabelsize = 20)
+    contour!(ax2, x_unique, p_unique, H', levels=levels, linewidth=1.5)
+    lines!(ax2, x, p, label = "trajekroria wartości oczekiwanych")
+    
+    scatter!(ax2, [-4.0], [2.15], color=:green, markersize=15, label="warunek początkowy")
+    axislegend(ax2, position=:lb, framevisible = false)
+    
+
+    # display(fig)
+    save("moyal_solver/graphics/trajectory.pdf", fig)
+    return fig
+end
+get_traj_of_exp_vals()

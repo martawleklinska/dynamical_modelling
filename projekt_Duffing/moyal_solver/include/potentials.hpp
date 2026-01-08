@@ -26,15 +26,13 @@ class GaussianPotential : public Potential {
 
 /**
  * @brief harmonic oscillator potential
- * clone() in code
+ * clone() in code, move-semantics
  */
 class HarmonicPotential : public Potential {
     public:
     double mass_ = 1;
     double omega_ = 1;
     double center_ = 0.5;
-        // HarmonicPotential(double mass, double omega, double center = 0.0) 
-        //     : mass_(mass), omega_(omega), center_(center) {};
         double operator()(double x, double t = 0.0) const override {
             double dx = x - center_;
             return 0.5 * mass_ * omega_ * omega_ * dx * dx;
@@ -78,9 +76,9 @@ public:
 };
 class DuffingPaper : public Potential {
 public:
-    double epsilon = 0.01;   // nonlinearity (paper: ε = 0.01)
-    double F       = 0.06;   // drive amplitude (0.015–0.06)
-    double omega   = 1.02;   // drive frequency (~1.016–1.02)
+    double epsilon = 0.01;   // nonlinearity (paper: epsilon = 0.01)
+    double F       = 0.06;   // drive amplitude (0.015-0.06)
+    double omega   = 1.02;   // drive frequency (~1.016-1.02)
 
     double operator()(double x, double t = 0.0) const override {
         return 0.5*x*x + 0.25*epsilon*x*x*x*x

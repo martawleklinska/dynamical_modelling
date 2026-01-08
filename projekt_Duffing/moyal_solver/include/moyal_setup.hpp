@@ -9,7 +9,7 @@ using ComplexMatrix = std::vector<std::vector<Complex>>;
 using RealMatrix = std::vector<std::vector<double>>;
 
 /**
- * @brief Potential functions class
+ * @brief Abstract Potential functions class
  * destructor must be virtual
  */
 class Potential {
@@ -38,11 +38,11 @@ struct MoyalConfig {
     int timeSteps = 200;
 
     // init conditions
-    double x_init  = -1.7;
-    double p_init  = 4.15;
+    double x_init  = -4.;
+    double p_init  = 2.15;
 
-    double sigma_x = 3.5; 
-    double sigma_p = 1/7;    // sigma_p = hbar/(2*sigma_x) = 1/(2*3.5) = 1.0
+    double sigma_x = 2.5; 
+    double sigma_p = 1/5;    ///< sigma_p = hbar/(2*sigma_x) = 1/(2*2.5)
 
     // output
     int outputEvery = 1;

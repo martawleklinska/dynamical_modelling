@@ -18,10 +18,10 @@ private:
     static int func(double t, const double y[], double f[], void *params);
     DuffingParams p; 
 
-    double t0 = 0.0; // start 
-    double t1 = 10.; // end
-    int n_steps = 10000; // n/o of steps
-    std::vector<std::array<double, 2>> initials = {         // initial conditions of (x0, v0)=(x0, \dot{x}0)
+    double t0 = 0.0; //!< start 
+    double t1 = 10.; //!< end
+    int n_steps = 10000; //!< n/o of steps
+    std::vector<std::array<double, 2>> initials = {         //!< initial conditions of (x0, v0)=(x0, \dot{x}0)
         {0.5, -2.0}, {-1.0, 2.0}, {-1., 0.50}, {0.5, -1.70},
         {0.0, 0.20}, {0.0, 0.50}};
 
@@ -52,30 +52,30 @@ public:
      * @param param_min, param_max - limits
      */
     void bifurcation_analysis(
-        std::string param_name,      // name of the parameter: "zeta", "alpha", "beta", "gamma", "omega"
-        double param_min,             // minimal limit of param
-        double param_max,             // max limit of the param
-        int n_param_steps,            // number of param steps
-        std::array<double, 2> ic,     // initial condition (x0, v0)
-        double t_transient = 100.0,   // transient time
-        int n_periods = 50,           // number of periods to save (poincare)
+        std::string param_name,      //!< name of the parameter: "zeta", "alpha", "beta", "gamma", "omega"
+        double param_min,             //!< minimal limit of param
+        double param_max,             //!< max limit of the param
+        int n_param_steps,            //!< number of param steps
+        std::array<double, 2> ic,     //!< initial condition (x0, v0)
+        double t_transient = 100.0,   //!< transient time
+        int n_periods = 50,           //!< number of periods to save (poincare)
         std::string filename = "bifurcation"
     );
     /**
      * @brief Lapunow exponent analysis
      */
     double lyapunov_exponent(
-        std::array<double, 2> ic,     // initial condition
-        double d0 = 1e-8,              // difference of initial condition 
-        double t_transient = 100.0,    // transient time
-        double t_measure = 500.0,      // time of measure
-        int n_renorm = 50000           // renormalisation factor
+        std::array<double, 2> ic,     //!< initial condition
+        double d0 = 1e-8,              //!< difference of initial condition 
+        double t_transient = 100.0,    //!< transient time
+        double t_measure = 500.0,      //!< time of measure
+        int n_renorm = 50000           //!< renormalisation factor
     );
     /**
      * @brief using lyapunov_exponent() we can check its dependency on a given param
      */
     void lyapunov_vs_parameter(
-        std::string param_name,// name of the parameter: "zeta", "alpha", "beta", "gamma", "omega"
+        std::string param_name,//!< name of the parameter: "zeta", "alpha", "beta", "gamma", "omega"
         double param_min,
         double param_max,
         int n_steps,

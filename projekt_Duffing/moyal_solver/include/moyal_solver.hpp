@@ -38,7 +38,7 @@
         void evolveOneStep();
         // fft_p not with booleans
 
-        //access
+        //access classes functions in main
         const WDF& getWigner() const { return wigner_ ;}
         const PhaseSpace& getPhaseSpace() const { return phase_space_;}
         double getCurrentTime() const { return current_time_; }
@@ -49,7 +49,7 @@
                                         double& sigma_x, double& sigma_p) const;
         
         /**
-         * @brief Calculate nonclassicality parameter δ(t)
+         * @brief Calculate nonclassicality parameter \delta(t)
          * @return \delta(t) = \int |\varrho(x,p,t)| dx dp - 1
          */
         double calculateNonclassicalityParameter() const;
