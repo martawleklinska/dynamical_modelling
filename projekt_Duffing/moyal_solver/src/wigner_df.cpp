@@ -27,7 +27,7 @@ void WDF::initializeGaussian(double x0, double p0, double sigma_x, double sigma_
             double exponent = -x*x / (2.0 * sigma_x*sigma_x) 
                              - 2.0 * sigma_x*sigma_x * p*p / (hbar*hbar);
             
-            // Note: Ignoring sigma_p for now to match original implementation
+            // Note: ignoring sigma_p so that to match \delta x\delta p \sim \hbar
             (void)sigma_p; // Suppress warning
             
             wigner_[i][j] = std::exp(exponent) / (M_PI * hbar);

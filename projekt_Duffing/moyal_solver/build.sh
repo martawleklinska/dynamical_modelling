@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== Building Structured Moyal Solver ==="
+echo "=== Building Moyal Solver ==="
 
 if [ ! -d "build" ]; then
     mkdir build

@@ -20,7 +20,7 @@ void run_poincare_analysis();
  */
 void run_bifurcation_analysis();
 /** 
- * @brief get data to plot Lapunow exponent in gamma (to get other params change it in .cpp)
+ * @brief get data to plot Lapunow exponent in gamma (to get other params change it in user_execute.cpp)
  */
 void run_lyapunov_analysis();
 /** 
