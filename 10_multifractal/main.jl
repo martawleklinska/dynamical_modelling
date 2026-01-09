@@ -77,12 +77,12 @@ function get_histogram()
         nbins = Int(ceil(1 / ε))
         h = fit(Histogram, xdata, nbins=nbins)
         plot!(p_hist[i], h.weights ./ sum(h.weights),
-        label="ε=$(round(ε, sigdigits=2))", xlims = (13000, 14000, 2e04))
+        label="ε=$(round(ε, sigdigits=2))", xlims = (13000, 13400))
     end
     savefig("10_multifractal/graphics/ex2_hist3.pdf")
     # display(p_hist)
 end
-# get_histogram()
+get_histogram()
 ##
 
 # ============================================================
@@ -164,7 +164,7 @@ end
 
 function test_cantor_multifractal()    
     p_values = [0.5, 0.25]
-    q_test = [-1, 0, 1, 2]
+    q_test = [-1, 0, 1.00001, 2]
     k_max = 6  
     
     for p in p_values
@@ -174,7 +174,7 @@ function test_cantor_multifractal()
         results_Dq = []
         
         for q in q_test
-            q_calc = (abs(q - 1) < 1e-6) ? 0.999 : q  
+            q_calc = (abs(q - 1) < 1e-9) ? 0.999 : q  
             
             Z_values = calculate_Z_cantor(q_calc, epsilons_cantor, measures)
             τ_numerical = fit_tau_cantor(q_calc, epsilons_cantor, Z_values)
@@ -287,10 +287,8 @@ function plot_cantor_validation(epsilons_cantor, measures, p, q_test)
         savefig(p3, "10_multifractal/graphics/cantor_Dq_linear_p05.pdf")
     end
     
-    savefig(p3, "10_multifractal/graphics/cantor_Dq_p$(p).pdf")
     display(p3)
 end
-
 
 function fit_tau_with_error(epsilons, Z_values)
     x = log.(epsilons)
@@ -310,3 +308,56 @@ end
 
 
 test_cantor_multifractal()
+
+function ex4_multifractal()
+    xdata = generate_trajectory(x0, N_total, N_discard)
+    N = length(xdata)
+    
+    epsilons = [1.5^(-k) for k in 5:15]  
+    
+    qs = collect(-10.0:0.5:10.0)  
+    qs[23] = 1+0.00001
+    τ_values = Float64[]
+    τ_errors = Float64[]
+    
+    for q in qs
+        Z_values = Float64[]
+        
+        for ε in epsilons
+            nbins = Int(ceil(1 / ε))
+            counts = zeros(nbins)
+            
+            for x in xdata
+                i = clamp(Int(floor(x / ε)) + 1, 1, nbins)
+                counts[i] += 1
+            end
+            
+            μ = counts[counts .> 0] ./ N
+            
+            if abs(q - 1) < 1e-6
+                Z = exp(-sum(μ .* log.(μ)))
+            else
+                Z = sum(μ.^q)
+            end
+            push!(Z_values, Z)
+        end
+        
+        τ, στ = fit_tau_with_error(epsilons, Z_values)
+        push!(τ_values, τ)
+        push!(τ_errors, στ)
+    end
+    
+    Dq_values = τ_values ./ (qs .- 1)
+    Dq_err = τ_errors./(qs.-1)
+    
+    fig1 = plot(qs, τ_errors, yerror = τ_errors; xlabel = "q", seriestype=:scatter,  ylabel = "τ(q)")
+    savefig(fig1, "10_multifractal/graphics/ex4_tau_q.pdf")
+
+    # fig2 = plot(qs, Dq_values, yerror = Dq_err; seriestype=:scatter,  xlabel = "q", ylabel = "D(q)")
+    # savefig(fig2, "10_multifractal/graphics/ex4_Dq.pdf")
+    println("q=0: D(0)=", round(Dq_values[21], sigdigits=5), "±", round(Dq_err[21], sigdigits=5))
+    println("q=1: D(1)=", round(Dq_values[23], sigdigits=5), "±", round(Dq_err[23], sigdigits=6), qs[23])
+    println("q=2: D(2)=", round(Dq_values[25], sigdigits=5), "±", round(Dq_err[25], sigdigits=5))
+
+end
+# ex4_multifractal()
