@@ -1,7 +1,7 @@
 include("plotter.jl")
 
 function run_all_tasks(;display::Bool = true)
-    # run_ode_trajs(display)             # plot 9 considered cases of combinations of params with γ=0
+    run_ode_trajs(display)             # plot 9 considered cases of combinations of params with γ=0
     # run_time_ode(display)              # plot 9 considered cases od time dependencies with γ=0
     # run_example_force_trajs(display)   # plot one double well trajectories with γ≠0
     # run_example_time_force(display)    # plot one double well time-dependencies with γ≠0
@@ -12,8 +12,8 @@ function run_all_tasks(;display::Bool = true)
     # run_energy_analysis(display)       # plot energy with respect to x and t
     # run_tdse()                         # SAVE gif of |ψ(x,t)|^2(x)
     # get_expectation_values(display)    # get <x>(t), <p>(t)
-    # get_exp_energy(display)    # get <E>(t)
-    get_expectation_values_in_xp(display)
+    # get_exp_energy(display)            # get <E>(t)
+    # get_expectation_values_in_xp(display)
 end
 
 run_all_tasks(display = false)

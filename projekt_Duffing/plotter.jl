@@ -108,7 +108,7 @@ function get_trajectories(p::Params, filename, title, isdisplay)
     if isdisplay
         display(fig)
     else 
-        save("projekt_Duffing/graphics/$filename.pdf", fig)
+        save("projekt_Duffing/graphics/$filename.png", fig)
     end
     return fig
 end
@@ -223,7 +223,7 @@ function sila_wymuszajaca(p::Params, isdisplay)
     if isdisplay
         display(fig)
     else 
-        save("projekt_Duffing/graphics/sila_wymuszajaca_gamma02.pdf", fig)
+        save("projekt_Duffing/graphics/sila_wymuszajaca_gamma02.png", fig)
     end
     return fig
 end
@@ -401,7 +401,7 @@ function run_energy_analysis(isdisplay)
 end
 function run_ode_trajs(display)
     for i in eachindex(p)
-        get_quantum_comparison(p[i], filenames[i], titles[i], display)
+        get_trajectories(p[i], filenames[i], titles[i], display)
     end
 end
 function run_time_ode(display)
