@@ -66,3 +66,7 @@
         void strangSplittingStep();
         void outputData();
  }; 
+
+
+ // policzyć ten sam przypadek co równanie schrodingera (energie i trajektorie - dla tych samych parametrow przy zeta=0 porównanie w przestrzeni fazowej)
+ // wdf: powiększyć pudło - ograniczyć amplitudę drgań

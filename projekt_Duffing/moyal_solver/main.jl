@@ -170,7 +170,7 @@ create_wigner_animation()
 ##
 
 function create_nonclassicality_plot()
-    stats_file = "projekt_Duffing/moyal_solver/build/output/stats.dat"
+    stats_file = "moyal_solver/build/output/stats.dat"
     if !isfile(stats_file)
         println("Stats file not found, skipping nonclassicality plot")
         return nothing
@@ -192,7 +192,7 @@ function create_nonclassicality_plot()
     lines!(ax, t, delta, linewidth = 3, color = :purple)
     hlines!(ax, [0], color = :black, linestyle = :dash, alpha = 0.5)
     # display(fig)
-    save("projekt_Duffing/moyal_solver/graphics/nonclassicality.png", fig)
+    save("moyal_solver/graphics/nonclassicality.png", fig)
     return fig
 end
 create_nonclassicality_plot()
@@ -242,7 +242,7 @@ function plot_duffing_potential()
     
     scatter!(ax2, [x_min, -x_min], [0, 0], color=:red, markersize=12, label="studnie potencjału")
     
-    scatter!(ax2, [-4.0], [2.15], color=:green, markersize=15, label="warunek początkowy")
+    scatter!(ax2, [-4.0], [1.15], color=:green, markersize=15, label="warunek początkowy")
     axislegend(ax2, position=:lb, framevisible = false)
     
 
@@ -277,8 +277,8 @@ function get_exp_vals()
     lines!(ax, t, x, color = ax1_color, linewidth = 4)
     lines!(ax2, t, p, color = ax2_color, linewidth = 4)
     
-    display(fig)
-    # save("moyal_solver/graphics/xp_exp_val.pdf", fig)
+    # display(fig)
+    save("moyal_solver/graphics/xp_exp_val.pdf", fig)
 end
 
 get_exp_vals()
@@ -299,7 +299,7 @@ function get_traj_of_exp_vals()
     
     H = [(p^2)/(2m) + V for p in p_unique, V in Vx]
 
-    data = readdlm("projekt_Duffing/moyal_solver/build/output/stats.dat", skipstart = 1)
+    data = readdlm("moyal_solver/build/output/stats.dat", skipstart = 1)
     t = data[:, 2]
     x = data[:, 3]
     p = data[:, 4]
@@ -323,12 +323,12 @@ function get_traj_of_exp_vals()
     contour!(ax2, x_unique, p_unique, H', levels=levels, linewidth=1.5)
     lines!(ax2, x, p, label = "trajekroria wartości oczekiwanych")
     
-    scatter!(ax2, [-4.0], [2.15], color=:green, markersize=15, label="warunek początkowy")
+    scatter!(ax2, [-4.0], [1.15], color=:green, markersize=15, label="warunek początkowy")
     axislegend(ax2, position=:lb, framevisible = false, labelsize = 20)
     
 
     # display(fig)
-    save("projekt_Duffing/moyal_solver/graphics/trajectory.pdf", fig)
+    save("moyal_solver/graphics/trajectory.pdf", fig)
     return fig
 end
 get_traj_of_exp_vals()

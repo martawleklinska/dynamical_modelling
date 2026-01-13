@@ -70,7 +70,11 @@ void get_time_dependent_solver(){
         Duffing duff(0.05, 1.0, 5.0, 2.5, 2.0);
         duff.solve("ab_pos_zeta05_gamma25_omega2");
     }
-    
+    {
+        std::cout << "zeta=0.0, alpha = -1.0, beta = 1.0, gamma = 0.3, omega = 1.0\n";
+        Duffing duff(0., -1.0, 1.0, 0.3, 1.0);
+        duff.solve("quantum_comparison");
+    }
     std::cout << "finished.\n";
 }
 

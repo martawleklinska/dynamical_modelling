@@ -19,7 +19,8 @@ p = [
     Params(3., 1.0, 5.0, 0.0, 0.0),
     Params(-0.1, 1.0, 5.0, 0.0, 0.0),
     Params(-0.1, -1.0, -5.0, 0.0, 0.0),
-    Params(-3., -1.0, -5.0, 0.0, 0.0)
+    Params(-3., -1.0, -5.0, 0.0, 0.0),
+    Params(0.0, -1.0, 1.0, 0.3, 1.0)
     ]
 filenames = [
     "ab_pos_zeta_small_",
@@ -30,7 +31,8 @@ filenames = [
             "ab_pos_zeta_big_",
             "ab_pos_zeta_neg_",
             "ab_neg_zeta_neg_x",
-            "ab_neg_zeta_neg_big_"
+            "ab_neg_zeta_neg_big_",
+            "quantum_comparison"
             ]
 titles = [  
           L"$(\zeta, \; \alpha, \; \beta) = (0.1,\; 1.0,\; 5.0)$",
@@ -41,7 +43,8 @@ titles = [
           L"$(\zeta, \; \alpha, \; \beta) = (3., \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;1.0, \;5.0)$",
           L"$(\zeta, \; \alpha, \; \beta) = (-0.1, \;-1.0, \;-5.0)$",
-          L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$"
+          L"$(\zeta, \; \alpha, \; \beta) = (-3., \;-1.0, \;-5.0)$",
+          L"$(\alpha, \; \beta, \; \gamma, \; \omega) = (-1.0, \;1.0, \; 0.3, \;1.0)$"
 ]
 
 ## =======================================================================
@@ -122,11 +125,13 @@ function get_time_dependencies(p::Params, filename, title, isdisplay)
         L"(x_0,\;v_0)=(0.5, \;-1.7)",
         L"(x_0,\;v_0)=(0.5, \;-2.0)", 
         ]
+    # init_vals = [        L"(x_0,\;v_0)=(1.0, \;0.0)", 
+    #     L"(x_0,\;v_0)=(-1., \;0.0)",]
     # ============================================================
     fig = Figure(size = (1000, 500))
-    ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30, limits = ((-0.1, 10.2), (-3.2, 3.2)),
+    ax = Axis(fig[1, 1], xlabel=L"t", ylabel=L"$x$", xlabelsize = 30, limits = ((-0.1, 10.2), (-3.0, 3.0)),
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
-    ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30, limits = ((-0.1, 10.2), (-10.5, 10.7)),
+    ax2 = Axis(fig[1, 2], xlabel=L"t", ylabel=L"$v$", xlabelsize = 30, limits = ((-0.1, 10.2), (-10.7, 10.3)),
     ylabelsize = 30, title=title, titlesize = 30, xticklabelsize = 20, yticklabelsize = 20)
     
     # ============================================================
@@ -157,10 +162,11 @@ function get_time_dependencies(p::Params, filename, title, isdisplay)
     if isdisplay
         display(fig)
     else 
-        save("projekt_Duffing/graphics/time$filename.pdf", fig)
+        save("graphics/time$filename.pdf", fig)
     end
     return fig
 end
+
 ## =======================================================================
 # === TRAJECTORIES FOR 1 GIVEN COMBINATION OF PARAMS ζ, α, β with γ≠0 ===
 ## =======================================================================
@@ -395,7 +401,7 @@ function run_energy_analysis(isdisplay)
 end
 function run_ode_trajs(display)
     for i in eachindex(p)
-        get_trajectories(p[i], filenames[i], titles[i], display)
+        get_quantum_comparison(p[i], filenames[i], titles[i], display)
     end
 end
 function run_time_ode(display)
@@ -559,6 +565,42 @@ function get_expectation_values(isdisplay::Bool)
         display(fig)
     else 
         save("projekt_Duffing/graphics/QM_xp_exp_val2.pdf", fig)
+    end
+end
+# =========== in phase space ===================
+function get_expectation_values_in_xp(isdisplay::Bool)
+    data = readdlm("build/data/quantum/duffing_gauss1_observables.txt", skipstart = 1)
+    data2 = readdlm("build/data/quantum/duffing_gauss2_observables.txt", skipstart = 1)
+    t = data[begin:200, 2]
+    x = data[begin:200, 3]
+    p = data[begin:200, 4]
+    x2 = data2[begin:200, 3]
+    p2 = data2[begin:200, 4]
+    E = data[:, 5]
+    fig = Figure(size = (1000, 500))
+    ax1_color = :black
+    ax = Axis(fig[1,1], xlabel = L"\langle x\rangle\; (\text{a.u.})", ylabel = L"\langle p \rangle\; \text{(a.u.)}", 
+    xlabelsize = 30, ylabelsize = 30, xticklabelsize = 20, yticklabelsize = 20,
+    leftspinecolor = ax1_color, yaxisposition = :left, 
+    yticklabelcolor = ax1_color, ylabelcolor = ax1_color, ytickcolor = ax1_color)
+    ax2_color = :crimson
+    # ax2 = Axis(fig[1,1], ylabel = L"\langle p \rangle\; \text{(a.u.)}", ylabelsize = 40, titlesize = 30,
+    # yticklabelsize = 30, yaxisposition = :right, rightspinecolor = ax2_color, 
+    # yticklabelcolor = ax2_color, ylabelcolor = ax2_color, ytickcolor = ax2_color)
+    # hidexdecorations!(ax2)
+    # ylims!(ax2, 8, 10)
+    scatter!(ax, 0.0, 0.0, color = :black, markersize = 20, marker = :star5)
+    scatter!(ax, sqrt(1.0/1.0), 0.0, color = :blue, markersize = 20, marker = :star5)
+    scatter!(ax, -sqrt(1.0/1.0), 0.0, color = :red, markersize = 20, marker = :star5)
+    scatter!(ax, -1.0, 0.0, color = :blue, markersize = 20, marker = :circle)
+    scatter!(ax, 1.0, 0.0, color = :red, markersize = 20, marker = :circle)
+    lines!(ax, x, p, color = :royalblue1, linewidth = 4)
+    lines!(ax, x2, p2, color = ax2_color, linewidth = 4)
+    # lines!(ax2, t, E, color = :purple, linewidth = 4)
+    if isdisplay
+        display(fig)
+    else 
+        save("graphics/xp_exp_val_phase_space.pdf", fig)
     end
 end
 
